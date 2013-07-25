@@ -5,6 +5,7 @@ class Entity(object):
 	"""An entity found in the game world"""
 
 	def __init__(self):
+		assert(self.name)
 		if self.image:
 			self.sprite = cocos.sprite.Sprite(self.image)
 
