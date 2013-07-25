@@ -23,7 +23,6 @@ class PlayerController(Controller):
         skey = pyglet.window.key.symbol_string(key) #String representation of the key
         print "[CONTROLS] Key pressed: ", skey
         d = self.player.mov_acc #temporary dirty direct code
-        print dir(d)
         if skey == "LEFT":
             d.x -= 220
         elif skey == "RIGHT":

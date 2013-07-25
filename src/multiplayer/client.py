@@ -4,6 +4,7 @@ import json
 from game.game import game #Yeeeaaah.... Time to figure out python packages!
 
 server = None
+old_data = ""
 
 def join():
 	global server
@@ -22,15 +23,25 @@ def recieve():
 	        pass
 	else:
 		if raw_data:
-			#first handle command splitting
-			while raw_data:
-				l, data = raw_data.split("|", 1) #Only split the first |
-				l = int(l)
-				raw_data = data[l:] #continue processing the rest of the data
-				if len(raw_data) < l:
-					pass #TODO: Handle too much data at once
+			stop = False
+			while not stop:
+				raw_data = old_data + raw_data
+				print "[SERVER] Raw data to process: ", raw_data
+				
+				length, data = raw_data.split("|",1)
+				length = int(length)
+
+			
+				if len(data) > length:
+					global old_data
+					handle_data(data[:length])
+					raw_data = data[length:]
 				else:
-					handle_data(data[:l]) #handle the recieved command
+					stop = True
+					if len(data) < length: #Not enough data, so lets wait for it
+						old_data = old_data + data
+					else: #Data is correct length. Process it
+						handle_data(data)
 
 def send(command, data):
 	"""Send data to the server"""
