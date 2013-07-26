@@ -21,12 +21,12 @@ def start():
 			import multiplayer.server
 
 			multiplayer.server.host()
-			scene.schedule_interval(multiplayer.server.update, 0.5)
+			scene.schedule_interval(multiplayer.server.update, 0.05)
 		else:
 			import multiplayer.client
 
 			multiplayer.client.join()
-			scene.schedule_interval(multiplayer.client.update, 0.5)
+			scene.schedule_interval(multiplayer.client.update, 0.05)
 
 	player = entity.player.Player()
 	scene.add(player.sprite)

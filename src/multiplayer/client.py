@@ -59,7 +59,8 @@ def handle_data(raw_data):
 		#Time to update an entity
 		d = data["data"]
 		eid = d["eid"]
-		entity = game.get_entity(eid)
+		e = game.get_entity(eid)
+		old_pos = e.position
 		for k,v in d.items():
 			if isinstance(v, dict): #The value is an object and must be constructed
 				if v["type"] == "Vector2":
@@ -69,7 +70,11 @@ def handle_data(raw_data):
 				else:
 					print "[WARNING] Client recieved undefined data type" #Should ignore it most likely
 					continue
-			setattr(entity, k, v) #YOLO
+			setattr(e, k, v) #YOLO
+
+		#movement interpolation, such dirty!
+		from entity import actions
+		#e.sprite.do(actions.InterpolateMovement(0.5, e, old_pos))
 
 	elif data["command"] == "spawn":
 		e = data["data"]
