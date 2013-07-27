@@ -9,7 +9,7 @@ old_data = ""
 def join():
 	global server
 
-	server = socket.socket()
+	server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	server.connect(("localhost",30035))
 	server.setblocking(0)
 
@@ -47,8 +47,7 @@ def send(command, data):
 	"""Send data to the server"""
 	print "[CLIENT] Sending data: Command: '%s' Data: '%s'"%(command,data)
 	d = json.dumps({"command":command, "data":data})
-	msg = str(len(d)) + "|" + d
-	server.send(msg)
+	server.send(d)
 
 
 def handle_data(raw_data):
