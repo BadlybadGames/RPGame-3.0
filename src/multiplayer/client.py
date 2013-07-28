@@ -2,6 +2,7 @@ import socket
 import json
 
 from game.game import game #Yeeeaaah.... Time to figure out python packages!
+import interface.controls
 
 server = None
 old_data = ""
@@ -75,4 +76,10 @@ def handle_data(raw_data):
 
 def update(t):
 	recieve()
+
+	#Check if we need to send an update of our controls
+	state = interface.controls.get_state()
+	if state["updated"]:
+		send("update_controls",state)
+		state["updated"] = False 
 

@@ -2,10 +2,11 @@ import socket
 import json
 import collections
 
+import entity.entity
 from game.game import game #Yeeeaaah.... Time to figure out python packages!
 
 server = None
-clients = []
+clients = {} #(addr, player eid)
 old_data = ""
 
 
@@ -15,16 +16,23 @@ def add_client(addr):
 def recieve():
 	"""Check for updates from clients"""
 	try:
-		raw_data, client = server.recvfrom(1024)
+		raw_data, addr = server.recvfrom(1024)
 	except socket.error as e:
 	    if e.errno == 10035:
 	        pass
 	else:
 		if raw_data:
-			print "[SERVER] Recieved data from %s: %s"%(client, raw_data)
-			if not client in clients:
-				clients.append(client)
-			handle_data(raw_data)
+			print "[SERVER] Recieved data from %s: %s"%(addr, raw_data)
+			if not addr in clients.keys(): #A new client connecting
+				print "A new client connected, lets create a new player for them"
+				#Create a new player for them
+				e = entity.player.Player()
+				e.local = False
+				game.spawn(e)
+
+				clients[addr] = (addr, e.eid)
+
+			handle_data(clients[addr], raw_data)
 
 def _send(addr, data):
 	"""send(addr, data) -> packet size
@@ -57,7 +65,7 @@ def send(command, data, to=None):
 		_send(addr, msg)
 
 
-def handle_data(raw_data):
+def handle_data(client, raw_data):
 	data = json.loads(raw_data)
 
 	#Perform the command --this part is equal in server and client. Should have common function in base class
@@ -76,6 +84,10 @@ def handle_data(raw_data):
 					print "[WARNING] Client recieved undefined data type" #Should ignore it most likely
 					continue 
 			setattr(entity, k, v) #YOLO
+
+	elif data["command"] == "update_controls": #The client wants to update the state of his controls
+		e = game.get_entity(client[1])
+		e.update_input(data["data"])
 
 def update(t):
 	recieve()
