@@ -6,13 +6,6 @@ from game.game import game #Yeeeaaah.... Time to figure out python packages!
 server = None
 old_data = ""
 
-def join():
-	global server
-
-	server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	server.connect(("localhost",30035))
-	server.setblocking(0)
-
 def recieve():
 	"""Check for data from server"""
 

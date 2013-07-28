@@ -33,7 +33,7 @@ class PlayerController(Controller):
             d.y -= 220
 
         #Notify server/client about the update
-        if game.multiplayer:
+        if multiplayer.is_multiplayer():
             data = {}
             if skey in ["LEFT","RIGHT","UP","DOWN"]: #Update position and movement info
                 data = {
@@ -47,9 +47,9 @@ class PlayerController(Controller):
                 }
 
             if data:
-                if game.multiplayer_type == "server":
+                if multiplayer.is_server():
                     multiplayer.server.send(command = "update", data = data)
-                elif game.multiplayer_type == "client":
+                else:
                     multiplayer.client.send(command = "update", data = data)        
 
     def on_key_release(self,key,modifiers):
@@ -65,7 +65,7 @@ class PlayerController(Controller):
         elif skey == "DOWN":
             d.y += 220
 
-        if game.multiplayer:
+        if multiplayer.is_multiplayer():
             data = {}
             if skey in ["LEFT","RIGHT","UP","DOWN"]: #Update position and movement info
                 data = {
@@ -79,7 +79,7 @@ class PlayerController(Controller):
                 }
 
             if data:
-                if game.multiplayer_type == "server":
+                if multiplayer.is_server():
                     multiplayer.server.send(command = "update", data = data)
-                elif game.multiplayer_type == "client":
+                else:
                     multiplayer.client.send(command = "update", data = data)        

@@ -2,43 +2,29 @@ import cocos
 from cocos.director import director
 
 import entity.player
+import multiplayer
 
 game = None
-scene = None
 
 def start():
 	global game
-	global scene
 
 	#Setup the game
-	scene = cocos.scene.Scene()
+	layer = cocos.layer.Layer()
 	game = Game()
 
-	#Setup multiplayer
-	if game.multiplayer:
-		global multiplayer
-		if game.multiplayer_type == "server":
-			import multiplayer.server
-
-			multiplayer.server.host()
-			scene.schedule_interval(multiplayer.server.update, 0.05)
-		else:
-			import multiplayer.client
-
-			multiplayer.client.join()
-			scene.schedule_interval(multiplayer.client.update, 0.05)
-
 	player = entity.player.Player()
-	scene.add(player.sprite)
+	layer.add(player.sprite)
 
 	#Setup controls
 	import controls.controls #TODO: Add init functions for modules so late import isnt needed
 	control = controls.controls.PlayerController(player=player)
-	scene.add(control)
+	layer.add(control)
 
 	game.spawn(player)
-	scene.schedule(game.update)
-	director.run(scene)
+	layer.schedule(game.update)
+	
+	return layer
 
 
 class Game():
@@ -49,8 +35,6 @@ class Game():
 	"""
 
 	def __init__(self):
-		self.multiplayer = True
-		self.multiplayer_type = "client"
 		self.entities = {}	
 
 	def update(self, t):
@@ -83,5 +67,5 @@ class Game():
 			e.eid = len(self.entities)+1
 		self.entities[e.eid] = e
 
-		if self.multiplayer and self.multiplayer_type == "server":
+		if multiplayer.is_server():
 			multiplayer.server.send(command="spawn",data={"type":e.name, "data":{}})

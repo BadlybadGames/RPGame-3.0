@@ -8,16 +8,9 @@ server = None
 clients = []
 old_data = ""
 
-def host():
-	global server
-	global clients
-	server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	server.bind(("",30035))
-	server.setblocking(0)
 
 def add_client(addr):
 	clients.append(addr)
-
 
 def recieve():
 	"""Check for updates from clients"""
