@@ -40,9 +40,9 @@ def _send(addr, data):
 	Low level socket data sending.
 
 	"""
-	print "[SERVER] Sending data to %s: '%s' \n"%(addr, data)
+	#print "[SERVER] Sending data to %s: '%s' \n"%(addr, data)
 
-	size = server.sendto(data, client)
+	size = server.sendto(data, addr)
 	return size
 
 
@@ -54,15 +54,15 @@ def send(command, data, to=None):
 	"""
 
 	if not to:
-		to = clients
+		to = clients.values()
 
 	if not isinstance(to, collections.Iterable):
 		to = (to)
 
 	msg = json.dumps({"command":command, "data":data})
 
-	for addr in to:
-		_send(addr, msg)
+	for client in to:
+		_send(client[0], msg)
 
 
 def handle_data(client, raw_data):
@@ -89,5 +89,12 @@ def handle_data(client, raw_data):
 		e = game.get_entity(client[1])
 		e.update_input(data["data"])
 
+def send_world():
+	for e in game.entities.values():
+		send("update", e.to_json())
+
 def update(t):
 	recieve()
+
+	#send world update
+	send_world()

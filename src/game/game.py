@@ -59,7 +59,7 @@ class Game():
 				i.sprite.position = i.position
 
 	def get_entity(self, eid):
-		return self.entities[eid]
+		return self.entities.get(eid)
 
 
 	def spawn(self, e):
@@ -69,5 +69,5 @@ class Game():
 
 		layer.add(e.sprite)
 
-		if multiplayer.is_server():
-			multiplayer.server.send(command="spawn",data={"type":e.name, "data":{}})
+		#if multiplayer.is_server():
+		#	multiplayer.server.send(command="spawn",data={"type":e.name, "data":{}})

@@ -6,7 +6,7 @@ from interface import controls
 class Player(entity.Entity):
 
 	def __init__(self):
-		self.name = "player"
+		self.entity_name = "player"
 		self.image = "player.png"
 
 		super(Player, self).__init__()
