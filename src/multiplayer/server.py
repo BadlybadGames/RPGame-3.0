@@ -24,15 +24,19 @@ def recieve():
 		if raw_data:
 			print "[SERVER] Recieved data from %s: %s"%(addr, raw_data)
 			if not addr in clients.keys(): #A new client connecting
-				print "A new client connected, lets create a new player for them"
-				#Create a new player for them
-				e = entity.player.Player()
-				e.local = False
-				game.spawn(e)
-
-				clients[addr] = (addr, e.eid)
+				on_new_client(addr)
 
 			handle_data(clients[addr], raw_data)
+
+def on_new_client(addr):
+	print "A new client connected, lets create a new player for them"
+	#Create a new player for them
+	e = entity.player.Player()
+	e.local = False
+	game.spawn(e)
+
+	clients[addr] = (addr, e.eid)
+	send("set_control", {"eid":e.eid})
 
 def _send(addr, data):
 	"""send(addr, data) -> packet size

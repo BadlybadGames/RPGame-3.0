@@ -46,6 +46,14 @@ def handle_data(raw_data):
 		else:
 			e.update_from_json(d)
 
+	elif data["command"] == "set_control":
+		d = data["data"]
+		eid = d["eid"]
+		game.set_player(eid)
+
+	else:
+		assert(False, "We recieved a command but have no idea what to do with it")
+
 
 
 def update(t):

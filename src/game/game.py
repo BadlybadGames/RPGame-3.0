@@ -1,4 +1,5 @@
 import cocos
+import cocos.particle_systems
 from cocos.director import director
 
 import entity.player
@@ -23,6 +24,7 @@ def start():
 	layer.add(c)
 
 	game.spawn(player)
+	game.set_player(player.eid)
 	layer.schedule(game.update)
 
 	return layer
@@ -37,14 +39,12 @@ class Game():
 
 	def __init__(self):
 		self.entities = {}	
+		self.controlled_player = None
 
 	def update(self, t):
 		#Update position then velocity
 		#print "Tick: ",t
-		for i in self.entities.values():
-			if i.is_player and i.local:
-				i.update_input()
-			
+		for i in self.entities.values():			
 			#Set our acceleration according to user input
 			i.mov_acc = i.move_dir * i.acc_speed
 
@@ -61,6 +61,11 @@ class Game():
 	def get_entity(self, eid):
 		return self.entities.get(eid)
 
+	def get_player(self):
+		return self.get_entity(self.controlled_player)
+
+	def set_player(self, eid):
+		self.controlled_player = eid
 
 	def spawn(self, e):
 		if not hasattr(e, "eid"):

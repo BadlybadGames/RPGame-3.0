@@ -1,6 +1,8 @@
 import cocos
 import pyglet
 
+from game.game import game
+
 control = None
 
 def init():
@@ -36,7 +38,10 @@ class PlayerController(Controller):
         skey = pyglet.window.key.symbol_string(key) #String representation of the key
         print "[CONTROLS] Key pressed: ", skey
 
+        updated = False
+
         if skey in ("LEFT", "RIGHT", "UP", "DOWN"):
+            updated = True
             self.state["updated"] = True
 
             if skey == "LEFT":
@@ -48,31 +53,19 @@ class PlayerController(Controller):
             elif skey == "DOWN":
                 self.state["movement"][1] -= 1
 
-        #Notify server/client about the update
-        # if multiplayer.is_multiplayer():
-        #     data = {}
-        #     if skey in ["LEFT","RIGHT","UP","DOWN"]: #Update position and movement info
-        #         data = {
-        #             "eid":self.player.eid,
-        #             "mov_acc":{
-        #                 "type":"Vector2", "args":[d.x, d.y]
-        #                 },
-        #             "position":{
-        #                 "type":"Vector2", "args":[self.player.position.x, self.player.position.y]
-        #                 },
-        #         }
-
-        #     if data:
-        #         if multiplayer.is_server():
-        #             multiplayer.server.send(command = "update", data = data)
-        #         else:
-        #             multiplayer.client.send(command = "update", data = data)        
+        if updated:
+            game.get_player().update_input(self.state)
+            return True
+        else:
+            return False
 
     def on_key_release(self,key,modifiers):
         skey = pyglet.window.key.symbol_string(key) #String representation of the key
         print "[CONTROLS] Key released: ", skey
 
+        updated = False
         if skey in ("LEFT", "RIGHT", "UP", "DOWN"):
+            updated = True
             self.state["updated"] = True
             
             if skey == "LEFT":
@@ -83,3 +76,9 @@ class PlayerController(Controller):
                 self.state["movement"][1] -= 1
             elif skey == "DOWN":
                 self.state["movement"][1] += 1
+
+        if updated:
+            game.get_player().update_input(self.state)
+            return True
+        else:
+            return False
