@@ -16,6 +16,6 @@ class Player(entity.Entity):
 
 	def update_input(self, state):
 
-		self.rotation = state["rotation"]
+		self.aim = state["aim"]
 		self.move_dir = euclid.Vector2(*state["movement"])
 		self.move_dir.normalize() #We only want the direction (at least when using a keyboard)

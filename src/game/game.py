@@ -5,6 +5,8 @@ from cocos.director import director
 import entity.player
 import multiplayer
 
+import util
+
 game = None
 layer = None
 
@@ -54,9 +56,18 @@ class Game():
 			#perform friction. Improve pls!
 			i.mov_vel = i.mov_vel *((1-t)*0.5)
 
+			#Update aiming
+			target_aim = util.vec_to_rot(i.aim)
+			dr = target_aim - i.rotation
+			if dr < 0: #TODO: add wrapping 360->0 
+				i.rotation += max((i.turn_speed * t)*-1, dr) #Dont rotate too far
+			else:
+				i.rotation += min(i.turn_speed * t, dr)
+
 			#update display accordingly
 			if i.sprite:
 				i.sprite.position = i.position
+				i.sprite.rotation = i.rotation
 
 	def get_entity(self, eid):
 		return self.entities.get(eid)

@@ -2,6 +2,7 @@ import cocos
 import pyglet
 
 from game.game import game
+import util
 
 control = None
 
@@ -24,7 +25,7 @@ class Controller(cocos.layer.Layer):
         #The state is what the player ultimately wants to achieve, after keybinds. This is what is sent to the server from clients
         self.state = {
             "movement":[0,0], #Vector target direction
-            "rotation":0,               #Angle of player rotation 
+            "aim":[0,0],      #The point the player is aiming towards 
         }
 
         self.state["updated"] = False #Do we need to send an update to the server?
@@ -82,3 +83,17 @@ class PlayerController(Controller):
             return True
         else:
             return False
+
+    def on_mouse_motion(self, x, y, dx, dy):
+        self.state["updated"] = True
+
+        player = game.get_player()
+
+        px, py = player.position
+        fx, fy = x - px, y - py
+
+        self.state["aim"][0] = fx
+        self.state["aim"][1] = fy
+
+        game.get_player().update_input(self.state)
+        return True

@@ -11,10 +11,13 @@ class Entity(object):
 
 		#Movement variables
 		self.position = euclid.Vector2(200.0,200.0)
+		self.rotation = 0
 		self.mov_vel = euclid.Vector2(0.0,0.0)
 		self.mov_acc = euclid.Vector2(0.0,0.0)
 		self.move_dir = euclid.Vector2(0.0,0.0)
 		self.acc_speed = 200
+		self.turn_speed = 400 #Degrees/second
+		self.aim = (30,30) #Vector from where we are standing to the point we want to aim towards
 
 	@classmethod
 	def from_json(cls, json):
@@ -27,7 +30,7 @@ class Entity(object):
 		for k, v in json.items():
 			if k == "eid": #We dont want to update an eid after the entity has been made. Especially not if its from a client
 				continue
-				
+
 			if isinstance(v, dict): #The value requires a construction of a type
 				if v["type"] == "Vector2":
 					v = euclid.Vector2(v["args"][0], v["args"][1])
