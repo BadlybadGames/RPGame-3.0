@@ -1,5 +1,4 @@
 import cocos
-import cocos.particle_systems
 from cocos.director import director
 from cocos import euclid
 
