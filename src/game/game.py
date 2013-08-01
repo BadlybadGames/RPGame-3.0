@@ -1,6 +1,7 @@
 import cocos
 import cocos.particle_systems
 from cocos.director import director
+from cocos import euclid
 
 import entity.player
 import multiplayer
@@ -42,32 +43,37 @@ class Game():
 	def __init__(self):
 		self.entities = {}	
 		self.controlled_player = None
+		self.tick = 0
 
 	def update(self, t):
 		#Update position then velocity
-		#print "Tick: ",t
-		for i in self.entities.values():			
-			#Set our acceleration according to user input
-			i.mov_acc = i.move_dir * i.acc_speed
+		self.tick += t
+		for i in self.entities.values():
+			self.update_entity(i, t)
 
-			i.position += i.mov_vel * t + (i.mov_acc * t / 2)
-			i.mov_vel += i.mov_acc * t
+	def update_entity(self, ent, t):			
+		#Set our acceleration according to user input
+		ent.mov_acc = ent.move_dir * ent.acc_speed
 
-			#perform friction. Improve pls!
-			i.mov_vel = i.mov_vel *((1-t)*0.5)
+		ent.position += ent.mov_vel * t + (ent.mov_acc * t / 2)
+		ent.mov_vel += ent.mov_acc * t
 
-			#Update aiming
-			target_aim = util.vec_to_rot(i.aim)
-			dr = target_aim - i.rotation
-			if dr < 0: #TODO: add wrapping 360->0 
-				i.rotation += max((i.turn_speed * t)*-1, dr) #Dont rotate too far
-			else:
-				i.rotation += min(i.turn_speed * t, dr)
+		#perform friction. Improve pls!
+		ent.mov_vel = ent.mov_vel *((1-t)*0.5)
 
-			#update display accordingly
-			if i.sprite:
-				i.sprite.position = i.position
-				i.sprite.rotation = i.rotation
+		#Update aiming
+		target_aim = util.vec_to_rot(ent.aim)
+		dr = target_aim - ent.rotation
+		if dr < 0 and abs(dr) < 180: #TODO: add wrapping 360->0 
+			ent.rotation += max((ent.turn_speed * t)*-1, dr) #Dont rotate too far
+		else:
+			ent.rotation += min(ent.turn_speed * t, dr)
+
+		#update display accordingly
+		if ent.sprite:
+			#Interpolation
+			ent.sprite.position = (ent.sprite.position + ent.position) / 2
+			ent.sprite.rotation = (ent.sprite.rotation + ent.rotation) / 2
 
 	def get_entity(self, eid):
 		return self.entities.get(eid)

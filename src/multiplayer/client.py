@@ -8,6 +8,8 @@ import entity
 server = None
 old_data = ""
 
+entity_ticks = {} #Last tick we recieved updates for entities
+
 def recieve():
 	"""Check for data from server"""
 	raw_data = True
@@ -24,7 +26,7 @@ def recieve():
 def send(command, data):
 	"""Send data to the server"""
 	#print "[CLIENT] Sending data: Command: '%s' Data: '%s'"%(command,data)
-	d = json.dumps({"command":command, "data":data})
+	d = json.dumps({"command":command, "data":data, "tick":game.tick})
 	server.send(d)
 
 
@@ -34,8 +36,19 @@ def handle_data(raw_data):
 
 	if data["command"] == "update":
 		#Time to update an entity
+		tick = data["tick"]
+
 		d = data["data"]
 		eid = d["eid"]
+
+		#check for tick
+		if not entity_ticks.has_key(tick): #First time we recieve a tick
+			entity_ticks[eid] = tick
+		elif tick < entity_ticks[eid]: #The new update is old! lets disregard it
+			return
+		else:
+			entity_ticks[eid] = tick
+
 		e = game.get_entity(eid)
 		
 		if not e:
@@ -50,6 +63,11 @@ def handle_data(raw_data):
 		d = data["data"]
 		eid = d["eid"]
 		game.set_player(eid)
+
+	elif data["command"] == "set_tick":
+		d = data["data"]
+		tick = d ["tick"]
+		game.tick = tick
 
 	else:
 		assert(False, "We recieved a command but have no idea what to do with it")

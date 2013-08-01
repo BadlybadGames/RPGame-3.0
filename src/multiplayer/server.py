@@ -63,7 +63,7 @@ def send(command, data, to=None):
 	if not isinstance(to, collections.Iterable):
 		to = (to)
 
-	msg = json.dumps({"command":command, "data":data})
+	msg = json.dumps({"command":command, "data":data, "tick":game.tick})
 
 	for client in to:
 		_send(client[0], msg)

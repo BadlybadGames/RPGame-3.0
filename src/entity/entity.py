@@ -27,6 +27,7 @@ class Entity(object):
 		return e
 
 	def update_from_json(self, json):
+		self.interpolate(json)
 		for k, v in json.items():
 			if k == "eid": #We dont want to update an eid after the entity has been made. Especially not if its from a client
 				continue
@@ -55,3 +56,4 @@ class Entity(object):
 			else:
 				d[k] = v
 		return d
+
