@@ -10,9 +10,6 @@ clients = {} #(addr, player eid)
 old_data = ""
 
 
-def add_client(addr):
-	clients.append(addr)
-
 def recieve():
 	"""Check for updates from clients"""
 	try:
@@ -50,7 +47,7 @@ def _send(addr, data):
 	return size
 
 
-def send(command, data, to=None):
+def send(command, data, to=None, ignore=None):
 	"""Send data to one or multiple clients.
 
 	Data is sent as a '{lengthofdata}|{json}' string
@@ -66,6 +63,8 @@ def send(command, data, to=None):
 	msg = json.dumps({"command":command, "data":data, "tick":game.tick})
 
 	for client in to:
+		if client[0] == ignore:
+			continue
 		_send(client[0], msg)
 
 
@@ -95,7 +94,14 @@ def handle_data(client, raw_data):
 
 def send_world():
 	for e in game.entities.values():
-		send("update", e.to_json())
+		for client in clients.values():
+			print "client[1]: ", client[1]
+			print "e.eid:", e.eid
+			if e.eid == client[1]:
+				send("update", e.to_json(), ignore=client[0])
+				break
+		else:
+			send("update", e.to_json())
 
 def update(t):
 	recieve()

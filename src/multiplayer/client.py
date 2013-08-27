@@ -34,6 +34,7 @@ def handle_data(raw_data):
 	#print "[CLIENT] Recieved data, json: ", raw_data
 	data = json.loads(raw_data)
 
+	print "[CLIENT] Recieved data, command: ", data["command"]
 	if data["command"] == "update":
 		#Time to update an entity
 		tick = data["tick"]
