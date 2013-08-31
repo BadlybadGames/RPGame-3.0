@@ -63,10 +63,16 @@ class Game():
 		#Update aiming
 		target_aim = util.vec_to_rot(ent.aim)
 		dr = target_aim - ent.rotation
-		if dr < 0 and abs(dr) < 180: #TODO: add wrapping 360->0 
-			ent.rotation += max((ent.turn_speed * t)*-1, dr) #Dont rotate too far
+		v = 0
+
+		if abs(dr) >= 180: #Rotate clockwise
+			v = -1
 		else:
-			ent.rotation += min(ent.turn_speed * t, dr)
+			v = 1
+
+		ent.rotation += min((ent.turn_speed * t * v), dr)
+		if ent.rotation > 360:
+			ent.rotation -= 360
 
 		#update display accordingly
 		if ent.sprite:
