@@ -1,11 +1,7 @@
 import cocos
-from cocos.director import director
-from cocos import euclid
 
 import entity.player
-import multiplayer
 
-import util
 
 game = None
 layer = None

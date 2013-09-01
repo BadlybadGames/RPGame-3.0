@@ -9,6 +9,7 @@ class SetMovementDirection(InstantAction):
     def start(self):
         self.target.movement_direction = self.direction
 
+
 class InterpolateMovement(IntervalAction):
 
     def init(self, duration, entity, new_position):
@@ -19,4 +20,4 @@ class InterpolateMovement(IntervalAction):
 
     def update(self, t):
         d = self.entity.position - self.old
-        self.target.position = (self.old  + d * t)
+        self.target.position = (self.old + d * t)
