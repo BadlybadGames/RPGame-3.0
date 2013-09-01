@@ -8,6 +8,8 @@ class Entity(object):
 		self.is_player = False
 		if self.image:
 			self.sprite = cocos.sprite.Sprite(self.image)
+		
+		self.attached_to = None
 
 		#Movement variables
 		self.position = euclid.Vector2(200.0,200.0)
@@ -18,6 +20,9 @@ class Entity(object):
 		self.acc_speed = 200
 		self.turn_speed = 400 #Degrees/second
 		self.aim = (30,30) #Vector from where we are standing to the point we want to aim towards
+		
+		self.attacking = False
+		self.attack_cooldown = 0.0
 
 	@classmethod
 	def from_json(cls, json):
@@ -25,6 +30,22 @@ class Entity(object):
 		e = cls()
 		e.update_from_json(json)
 		return e
+
+	def update(self, t):
+		#Set our acceleration according to user input
+		self.mov_acc = self.move_dir * self.acc_speed
+
+		self.position += self.mov_vel * t + (self.mov_acc * t / 2)
+		self.mov_vel += self.mov_acc * t
+
+		#perform friction. Improve pls!
+		self.mov_vel = self.mov_vel *((1-t)*0.5)
+
+		#update display accordingly
+		if self.sprite:
+			#Interpolation
+			self.sprite.position = (self.sprite.position + self.position) / 2
+			self.sprite.rotation = (self.sprite.rotation + self.rotation) / 2
 
 	def update_from_json(self, json):
 		self.interpolate(json)

@@ -10,91 +10,69 @@ import util
 game = None
 layer = None
 
+
 def start():
-	global game
-	global layer
+    global game
+    global layer
 
-	#Setup the game
-	layer = cocos.layer.Layer()
-	game = Game()
+    #Setup the game
+    layer = cocos.layer.Layer()
+    game = Game()
 
-	player = entity.player.Player()
+    player = entity.player.Player()
 
-	#Setup controls
-	import interface.controls #TODO: Add init functions for modules so late import isnt needed
-	c = interface.controls.init()
-	layer.add(c)
+    #Setup controls
+    import interface.controls  # TODO: Add init functions for modules so late import isnt needed
+    c = interface.controls.init()
+    layer.add(c)
 
-	game.spawn(player)
-	game.set_player(player.eid)
-	layer.schedule(game.update)
+    game.spawn(player)
+    game.set_player(player.eid)
+    layer.schedule(game.update)
 
-	return layer
+    return layer
 
 
 class Game():
-	"""Game state
+    """Game state
 
-	Handles both game state and in-game world state
+    Handles both game state and in-game world state
 
-	"""
+    """
 
-	def __init__(self):
-		self.entities = {}	
-		self.controlled_player = None
-		self.tick = 0
+    def __init__(self):
+        self.entities = {}
+        self.controlled_player = None
+        self.tick = 0
 
-	def update(self, t):
-		#Update position then velocity
-		self.tick += t
-		for i in self.entities.values():
-			self.update_entity(i, t)
+    def update(self, t):
+        #Update position then velocity
+        self.tick += t
+        for i in self.entities.values():
+            self.update_entity(i, t)
 
-	def update_entity(self, ent, t):			
-		#Set our acceleration according to user input
-		ent.mov_acc = ent.move_dir * ent.acc_speed
+    def update_entity(self, ent, t):
+        ent.update(t)
 
-		ent.position += ent.mov_vel * t + (ent.mov_acc * t / 2)
-		ent.mov_vel += ent.mov_acc * t
+    def get_entity(self, eid):
+        return self.entities.get(eid)
 
-		#perform friction. Improve pls!
-		ent.mov_vel = ent.mov_vel *((1-t)*0.5)
+    def get_player(self):
+        return self.get_entity(self.controlled_player)
 
-		#Update aiming
-		target_aim = util.vec_to_rot(ent.aim)
-		dr = target_aim - ent.rotation
-		v = 0
+    def set_player(self, eid):
+        self.controlled_player = eid
 
-		if abs(dr) >= 180: #Rotate clockwise
-			v = -1
-		else:
-			v = 1
+    def spawn(self, e):
+        if not hasattr(e, "eid"):
+            e.eid = len(self.entities) + 1
+        self.entities[e.eid] = e
 
-		ent.rotation += min((ent.turn_speed * t * v), dr)
-		if ent.rotation > 360:
-			ent.rotation -= 360
+        if e.attached_to:
+            anchor = self.get_entity(e.attached_to)
+            anchor.sprite.add(e.sprite)
+        else:
+            layer.add(e.sprite)
 
-		#update display accordingly
-		if ent.sprite:
-			#Interpolation
-			ent.sprite.position = (ent.sprite.position + ent.position) / 2
-			ent.sprite.rotation = (ent.sprite.rotation + ent.rotation) / 2
-
-	def get_entity(self, eid):
-		return self.entities.get(eid)
-
-	def get_player(self):
-		return self.get_entity(self.controlled_player)
-
-	def set_player(self, eid):
-		self.controlled_player = eid
-
-	def spawn(self, e):
-		if not hasattr(e, "eid"):
-			e.eid = len(self.entities)+1
-		self.entities[e.eid] = e
-
-		layer.add(e.sprite)
-
-		#if multiplayer.is_server():
-		#	multiplayer.server.send(command="spawn",data={"type":e.name, "data":{}})
+        #if multiplayer.is_server():
+        #multiplayer.server.send(command="spawn",data={"type":e.name, "data":{}})
