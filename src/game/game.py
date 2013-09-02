@@ -16,10 +16,10 @@ def start():
     layer = cocos.layer.Layer()
     game = Game()
 
-    player = entity.player.Player()
+    player = entity.player.Player(position=(200, 200))
     player.weapon = equipment.BowWeapon(player)
 
-    enemy = entity.BasicEnemy()
+    enemy = entity.BasicEnemy(position=(400, 400))
 
     game.spawn(enemy)
 

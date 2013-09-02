@@ -6,11 +6,11 @@ import util
 
 class Player(entity.Entity):
 
-    def __init__(self):
+    def __init__(self, position):
         self.entity_name = "player"
         self.image = "player.png"
 
-        super(Player, self).__init__()
+        super(Player, self).__init__(position)
 
         self.is_player = True
         self.local = True  # TODO: This might be a little dirty

@@ -5,7 +5,7 @@ from cocos import euclid
 class Entity(object):
     """An entity found in the game world"""
 
-    def __init__(self):
+    def __init__(self, position):
         self.is_player = False
         if self.image:
             self.sprite = cocos.sprite.Sprite(self.image)
@@ -13,7 +13,7 @@ class Entity(object):
         self.attached_to = None
 
         #Movement variables
-        self.position = euclid.Vector2(200.0, 200.0)
+        self.position = euclid.Vector2(*position)
         self.rotation = 0
         self.mov_vel = euclid.Vector2(0.0, 0.0)
         self.mov_acc = euclid.Vector2(0.0, 0.0)
@@ -21,6 +21,11 @@ class Entity(object):
         self.acc_speed = 200
         self.turn_speed = 400  # Degrees/second
         self.aim = (30, 30)  # Our desired point of target
+
+        #init sprite position too
+        if self.sprite:
+            self.sprite.position = self.position
+            self.sprite.rotation = self.rotation
 
         self.attacking = False
         self.attack_cooldown = 0.0

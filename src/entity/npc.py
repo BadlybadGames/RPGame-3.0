@@ -7,8 +7,8 @@ class npc(entity.Entity):
 
     ai = ai.BasicEnemyAi
 
-    def __init__(self):
-        super(npc, self).__init__()
+    def __init__(self, position):
+        super(npc, self).__init__(position)
 
         if self.ai:
             self.ai = self.ai(owner = self)
