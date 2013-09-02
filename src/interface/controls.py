@@ -146,7 +146,7 @@ class GamepadController(Controller):
             self.state["movement"] = x, y
 
         elif axis in ("z", "rz"):  # secondary directional axis is changed, update aim
-            if abs(value) < 0.001:  # clamp values that result from leaving the dpad at center
+            if abs(value) < 0.005:  # clamp values that result from leaving the dpad at center
                 return
             self.state["updated"] = True
             updated = True
@@ -170,7 +170,11 @@ class GamepadController(Controller):
         if button == 5:
             self.state["attacking"] = True
 
+        game.get_player().update_input(self.state)
+
     def on_joybutton_release(self, joystick, button):
         print "joybutton release: ", button
         if button == 5:
             self.state["attacking"] = False
+
+        game.get_player().update_input(self.state)
