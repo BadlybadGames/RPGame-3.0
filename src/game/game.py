@@ -17,6 +17,10 @@ def start():
 
     player = entity.player.Player()
 
+    enemy = entity.BasicEnemy()
+
+    game.spawn(enemy)
+
     #Setup controls
     import interface.controls  # TODO: Add init functions for modules so late import isnt needed
     c = interface.controls.init()
@@ -69,6 +73,3 @@ class Game():
             anchor.sprite.add(e.sprite)
         else:
             layer.add(e.sprite)
-
-        #if multiplayer.is_server():
-        #multiplayer.server.send(command="spawn",data={"type":e.name, "data":{}})

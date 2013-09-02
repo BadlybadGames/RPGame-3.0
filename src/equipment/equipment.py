@@ -1,4 +1,5 @@
 import entity
+import util
 
 
 class Equipment(object):
@@ -22,11 +23,11 @@ class BowWeapon(Weapon):
         self.proj_speed = 10
 
     def attack(self):
-        e = entity.entity()
-        e.image = "arrow.png"
+        e = entity.Projectile()
 
         e.position = self.wielder.position
         e.rotation = self.wielder.rotation
+        e.move_dir = util.rot_to_vec(e.rotation)
 
 
 class MeleeWeapon(Weapon):
