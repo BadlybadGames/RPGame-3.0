@@ -5,6 +5,8 @@ from cocos import euclid
 class Entity(object):
     """An entity found in the game world"""
 
+    etype = "Entity"
+
     def __init__(self, position):
         self.is_player = False
         if self.image:
@@ -21,6 +23,7 @@ class Entity(object):
         self.acc_speed = 200
         self.turn_speed = 400  # Degrees/second
         self.aim = (30, 30)  # Our desired point of target
+        self.size = 32
 
         #init sprite position too
         if self.sprite:
@@ -99,4 +102,7 @@ class Entity(object):
             from game.game import game
             self.dead = True
             game.despawn(self)
+
+    def on_collision(self, other):
+        pass
 

@@ -1,4 +1,6 @@
 import cocos
+from cocos.director import director
+from cocos import collision_model as cm
 
 import entity.player
 import equipment
@@ -47,11 +49,34 @@ class Game():
         self.controlled_player = None
         self.tick = 0
 
+        w, h = director.get_window_size()
+        cell_size = 64*1.25  # The size used for grids for the collision manager
+        self.collision = cm.CollisionManagerGrid(0, w, 0, h, cell_size, cell_size)
+
     def update(self, t):
+        self.collision.clear()
+
         #Update position then velocity
         self.tick += t
         for i in self.entities.values():
             self.update_entity(i, t)
+
+        #Assuming all entities have collision
+        for e in self.entities.values():
+            e.update_collision()
+            self.collision.add(e)
+
+        self.run_collision()
+
+    def run_collision(self):
+        for a, b in self.collision.iter_all_collisions():
+            print "Collision!"
+            #check if the types of the two should result in collision
+            if any((a.etype == "projectile" and b.etype == "projectile",)):
+                continue
+
+            a.on_collision(b)
+            b.on_collision(a)
 
     def update_entity(self, ent, t):
         ent.update(t)

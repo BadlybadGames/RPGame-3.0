@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from cocos import collision_model as cm
 import entity
 import ai
 
@@ -6,6 +7,7 @@ import ai
 class npc(entity.Entity):
 
     ai = ai.BasicEnemyAi
+    etype = "enemy"
 
     def __init__(self, position):
         super(npc, self).__init__(position)
@@ -19,6 +21,13 @@ class npc(entity.Entity):
         if self.ai:
             self.ai.update_ai()
 
+    def update_collision(self):
+        self.cshape = cm.CircleShape(center=self.position, r=self.size)
+
+    def on_collision(self, other):
+        print "I was hit! by: ", other.etype
+        if other.etype == "projectile":
+            self.die()
 
 class BasicEnemy(npc):
     image = "player.png"

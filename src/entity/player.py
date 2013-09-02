@@ -1,10 +1,13 @@
 from cocos import euclid
+from cocos import collision_model as cm
 
 import entity
 import util
 
 
 class Player(entity.Entity):
+
+    etype = "player"
 
     def __init__(self, position):
         self.entity_name = "player"
@@ -40,6 +43,9 @@ class Player(entity.Entity):
             self.rotation -= 360
         if self.rotation < 0:
             self.rotation += 360
+
+    def update_collision(self):
+        self.cshape = cm.CircleShape(center=self.position, r=self.size)
 
     def attack(self):
         self.weapon.attack()

@@ -1,8 +1,11 @@
 import entity
+from cocos import collision_model as cm
 
 
 class Projectile(entity.Entity):
     image = "arrow.png"
+
+    etype = "projectile"
 
     def __init__(self, position, **kwargs):
         super(Projectile, self).__init__(position)
@@ -16,3 +19,6 @@ class Projectile(entity.Entity):
         self.duration -= t
         if self.duration <= 0:
             self.die()
+
+    def update_collision(self):
+        self.cshape = cm.CircleShape(center=self.position, r=self.size)
