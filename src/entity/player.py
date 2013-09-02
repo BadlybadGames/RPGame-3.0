@@ -41,13 +41,6 @@ class Player(entity.Entity):
         if self.rotation < 0:
             self.rotation += 360
 
-        #See if we want to and can attack
-        if self.attacking and self.attack_cooldown < 0:
-            self.attack()
-            self.attack_cooldown += self.weapon.attack_speed
-
-        self.attack_cooldown -= t
-
     def attack(self):
         self.weapon.attack()
 

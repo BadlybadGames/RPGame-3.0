@@ -167,6 +167,10 @@ class GamepadController(Controller):
 
     def on_joybutton_press(self, joystick, button):
         print "joybutton press: ", button
+        if button == 5:
+            self.state["attacking"] = True
 
     def on_joybutton_release(self, joystick, button):
         print "joybutton release: ", button
+        if button == 5:
+            self.state["attacking"] = False

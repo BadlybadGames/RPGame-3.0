@@ -25,6 +25,8 @@ class Entity(object):
         self.attacking = False
         self.attack_cooldown = 0.0
 
+        self.dead = False
+
     @classmethod
     def from_json(cls, json):
         """Build an object from jsoned data"""
@@ -41,6 +43,14 @@ class Entity(object):
 
         #perform friction. Improve pls!
         self.mov_vel = self.mov_vel * ((1 - t) * 0.5)
+
+        #See if we want to and can attack
+        if self.attacking and self.attack_cooldown < 0:
+            self.attack()
+            self.attack_cooldown += self.weapon.attack_speed
+
+        if self.attack_cooldown >= 0:
+            self.attack_cooldown -= t
 
         #update display accordingly
         if self.sprite:
@@ -78,4 +88,10 @@ class Entity(object):
             else:
                 d[k] = v
         return d
+
+    def die(self):
+        if not self.dead:
+            from game.game import game
+            self.dead = True
+            game.despawn(self)
 

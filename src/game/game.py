@@ -1,6 +1,7 @@
 import cocos
 
 import entity.player
+import equipment
 
 
 game = None
@@ -16,6 +17,7 @@ def start():
     game = Game()
 
     player = entity.player.Player()
+    player.weapon = equipment.BowWeapon(player)
 
     enemy = entity.BasicEnemy()
 
@@ -72,4 +74,10 @@ class Game():
             anchor = self.get_entity(e.attached_to)
             anchor.sprite.add(e.sprite)
         else:
+            print "added: ", e.sprite
             layer.add(e.sprite)
+
+    def despawn(self, e):
+        if e.sprite:
+            print "Want to remove: ", e.sprite
+            layer.remove(e.sprite)
