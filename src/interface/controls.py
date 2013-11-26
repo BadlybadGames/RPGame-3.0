@@ -10,9 +10,9 @@ control = None
 def init():
     global control
 
-    control = GamepadController()
-    #control = PlayerController()
-    return control
+    gamepad = GamepadController()
+    mouse = PlayerController()
+    return mouse
 
 
 def get_state():
@@ -121,6 +121,9 @@ class GamepadController(Controller):
 
     def on_enter(self):
         super(GamepadController, self).on_enter()
+        if not len(input.get_joysticks()):  # No joysticks plugged in
+            return
+
         self.joy = input.get_joysticks()[0]
         self.joy.on_joyaxis_motion = self.on_joyaxis_motion
         self.joy.on_joyhat_motion = self.on_joyhat_motion

@@ -6,6 +6,7 @@ class Projectile(entity.Entity):
     image = "arrow.png"
 
     etype = "projectile"
+    size = 50
 
     def __init__(self, position, **kwargs):
         super(Projectile, self).__init__(position)
@@ -21,4 +22,4 @@ class Projectile(entity.Entity):
             self.die()
 
     def update_collision(self):
-        self.cshape = cm.CircleShape(center=self.position, r=self.size)
+        self.cshape = cm.CircleShape(center=self.position, r=self.size/2.0)

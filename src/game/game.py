@@ -72,7 +72,9 @@ class Game():
         for a, b in self.collision.iter_all_collisions():
             print "Collision!"
             #check if the types of the two should result in collision
-            if any((a.etype == "projectile" and b.etype == "projectile",)):
+            if any(
+                ((a.etype == "projectile" and b.etype == "projectile"),)
+                ):
                 continue
 
             a.on_collision(b)

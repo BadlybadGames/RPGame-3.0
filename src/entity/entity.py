@@ -6,6 +6,7 @@ class Entity(object):
     """An entity found in the game world"""
 
     etype = "Entity"
+    size = 46
 
     def __init__(self, position):
         self.is_player = False
@@ -23,7 +24,7 @@ class Entity(object):
         self.acc_speed = 200
         self.turn_speed = 400  # Degrees/second
         self.aim = (30, 30)  # Our desired point of target
-        self.size = 32
+
 
         #init sprite position too
         if self.sprite:
@@ -83,7 +84,7 @@ class Entity(object):
             if k.startswith("_"):  # Ignore builtins
                 continue
 
-            if k in ("sprite",):
+            if k in ("sprite","ai", "cshape"):
                 continue
 
             v = getattr(self, k)

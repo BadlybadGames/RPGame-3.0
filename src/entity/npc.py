@@ -22,12 +22,12 @@ class npc(entity.Entity):
             self.ai.update_ai()
 
     def update_collision(self):
-        self.cshape = cm.CircleShape(center=self.position, r=self.size)
+        self.cshape = cm.CircleShape(center=self.position, r=self.size/2.0)
 
     def on_collision(self, other):
-        print "I was hit! by: ", other.etype
         if other.etype == "projectile":
-            self.die()
+            other.die()
+            #self.die()
 
 class BasicEnemy(npc):
     image = "player.png"
