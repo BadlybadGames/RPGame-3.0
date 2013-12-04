@@ -19,6 +19,7 @@ class Player(entity.Entity):
         self.is_player = True
         self.local = True  # TODO: This might be a little dirty
         self.player = 0  # Who controls this player? 0 = local, n = external
+        self.weapon = None
 
     def update(self, t):
         super(Player, self).update(t)
@@ -45,12 +46,10 @@ class Player(entity.Entity):
         if self.rotation < 0:
             self.rotation += 360
 
-    def update_collision(self):
-        self.cshape = cm.CircleShape(center=self.position, r=self.size)
-
     def attack(self):
         if self.weapon:
             self.weapon.attack()
+            self.attack_cooldown += self.weapon.attack_speed
 
     def update_input(self, state):
         self.attacking = state["attacking"]

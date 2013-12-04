@@ -1,9 +1,10 @@
-import entity
 from cocos import euclid
 import util
+from game.game import game
+import entity
 
 
-class Equipment(object):
+class Equipment(entity.Entity):
     pass
 
 
@@ -25,10 +26,10 @@ class BowWeapon(Weapon):
         self.proj_speed = 10
 
     def attack(self):
-        from game.game import game
 
-        e = entity.Projectile(position=self.wielder.position.copy(), duration=self.proj_life)
-
+        e = entity.get_entity_type("Projectile")
+        e.position = self.wielder.position.copy()
+        e.duration = self.proj_life
         e.rotation = self.wielder.rotation
         e.move_dir = euclid.Vector2(*util.rot_to_vec(e.rotation))
 
@@ -45,4 +46,4 @@ class MeleeWeapon(Weapon):
         self.duration = 1.0
 
     def attack(self):
-        e = entity.MeleeWeaponEntity(self)
+        e = entity.get_entity_type("MeleeWeaponEntity")

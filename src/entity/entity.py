@@ -7,6 +7,7 @@ logger = logging.getLogger("entity")
 
 types = {}
 
+
 def new_entity(entity):
     global types
 
@@ -22,11 +23,16 @@ def new_entity(entity):
 
     types[name] = entity
 
+def get_entity_type(name):
+    return types[name]
+
 
 def load_data():
     """Loads entity data from data files"""
-    execfile("player.py")
-    execfile("npc.py")
+    import player
+    import npc
+    import projectiles
+    import weapon
 
 class Entity(object):
     """An entity found in the game world"""
@@ -84,7 +90,6 @@ class Entity(object):
         #See if we want to and can attack
         if self.attacking and self.attack_cooldown < 0:
             self.attack()
-            self.attack_cooldown += self.weapon.attack_speed
 
         if self.attack_cooldown >= 0:
             self.attack_cooldown -= t

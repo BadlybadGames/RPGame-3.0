@@ -6,12 +6,10 @@ class Projectile(entity.Entity):
     image = "arrow.png"
 
     etype = "projectile"
+    name = "projectile"
 
-    def __init__(self, position, **kwargs):
-        super(Projectile, self).__init__(position)
-
-        self.position = position
-        self.duration = kwargs["duration"]
+    def __init__(self, **kwargs):
+        super(Projectile, self).__init__()
 
     def update(self, t):
         super(Projectile, self).update(t)
@@ -22,3 +20,5 @@ class Projectile(entity.Entity):
 
     def update_collision(self):
         self.cshape = cm.CircleShape(center=self.position, r=self.size)
+
+entity.new_entity(Projectile)

@@ -10,6 +10,7 @@ class npc(entity.Entity):
 
     ai = ai.BasicEnemyAi
     etype = "enemy"
+    name = "npc"
 
     def __init__(self, position):
         super(npc, self).__init__(position)
@@ -33,3 +34,5 @@ class npc(entity.Entity):
 
 class BasicEnemy(npc):
     image = "player.png"
+
+entity.new_entity(npc)

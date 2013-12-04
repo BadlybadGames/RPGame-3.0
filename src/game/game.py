@@ -5,10 +5,10 @@ from cocos import collision_model as cm
 import logging
 from collections import namedtuple
 
-import entity.player
-import equipment
+import entity
 
-INTERPOLATION_TIME =  0.1
+LERP_TIME =  0.1
+LERP_MAX_VEL = 80
 
 game = None
 layer = None
@@ -17,13 +17,19 @@ def start():
     global game
     global layer
 
+    #load game data
+    entity.load_data()
+
     #Setup the game
     layer = cocos.layer.Layer()
     game = Game()
 
-    player = entity.player.Player()
-    player.position.x, player.position.y = (200,200)
-    player.weapon = equipment.BowWeapon(player)
+    batch = cocos.batch.BatchNode()
+    game.sprite_batch = batch
+    layer.add(batch)
+
+    player = entity.get_entity_type("player")()
+    player.position.x, player.position.y = (200, 200)
 
     #Setup controls
     import interface.controls  # TODO: Add init functions for modules so late import isnt needed
@@ -32,6 +38,10 @@ def start():
 
     game.spawn(player)
     game.set_player(player.eid)
+    
+
+
+
     layer.schedule(game.update)
     layer.schedule(game.update_render)
 
@@ -76,9 +86,13 @@ class Game():
         for e in self.entities.values():
             if e.sprite:
                 #Interpolation
-                #Interpolate over INTERPOLATION_TIME
+                #Interpolate over LERP_TIME
+                # TODO: Do not interpolate local objects/objects owned by us
                 v = e.position - e.sprite.position
-                e.sprite.position += v * t / INTERPOLATION_TIME
+                if v.magnitude() > LERP_MAX_VEL:
+                    e.sprite.position = e.position
+                else:
+                    e.sprite.position += v * t / LERP_TIME
                 e.sprite.rotation = (e.sprite.rotation + e.rotation) / 2
 
     def run_collision(self):
@@ -114,9 +128,14 @@ class Game():
             anchor = self.get_entity(e.attached_to)
             anchor.sprite.add(e.sprite)
         else:
-            layer.add(e.sprite)
+            if e.image:
+                e.sprite = cocos.sprite.Sprite(e.image)
+                self.sprite_batch.add(e.sprite)
 
     def despawn(self, e):
         if e.sprite:
             logging.info("Want to remove: ", e.sprite)
-            layer.remove(e.sprite)
+            self.sprite_batch.remove(e.sprite)
+
+    def get_entity_type(self, name):
+        return entity.types["name"]

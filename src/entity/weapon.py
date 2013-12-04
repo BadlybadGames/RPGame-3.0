@@ -1,9 +1,9 @@
 import entity
-import cocos.collision_model as cm
 
 
 class MeleeWeaponEntity(entity.Entity):
 
+    name = "MeleeWeaponEntity"
     etype = "Projectile"
 
     def __init__(self, weapon, **kwargs):
@@ -25,5 +25,4 @@ class MeleeWeaponEntity(entity.Entity):
         if self.duration >= 0:
             self.die()
 
-    def update_collision(self):
-        self.cshape = cm.CircleShape(center=self.position, r=self.size)
+entity.new_entity(MeleeWeaponEntity)
