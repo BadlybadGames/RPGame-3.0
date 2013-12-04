@@ -8,6 +8,7 @@ from collections import namedtuple
 import entity.player
 import equipment
 
+INTERPOLATION_TIME =  0.1
 
 game = None
 layer = None
@@ -75,9 +76,9 @@ class Game():
         for e in self.entities.values():
             if e.sprite:
                 #Interpolation
-                #Interpolate over 0.5 seconds
-                v = e.sprite.position - e.position
-                e.sprite.position += v / 2.0
+                #Interpolate over INTERPOLATION_TIME
+                v = e.position - e.sprite.position
+                e.sprite.position += v * t / INTERPOLATION_TIME
                 e.sprite.rotation = (e.sprite.rotation + e.rotation) / 2
 
     def run_collision(self):

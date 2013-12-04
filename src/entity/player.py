@@ -49,7 +49,8 @@ class Player(entity.Entity):
         self.cshape = cm.CircleShape(center=self.position, r=self.size)
 
     def attack(self):
-        self.weapon.attack()
+        if self.weapon:
+            self.weapon.attack()
 
     def update_input(self, state):
         self.attacking = state["attacking"]

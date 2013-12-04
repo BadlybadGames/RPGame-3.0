@@ -111,12 +111,15 @@ class PlayerController(Controller):
             player.update_input(self.state)
         return True
 
-    def on_mouse_press(self, a, b, c):
-        #print "[CONTROLS] Mouse key pressed: ", a, b, c,
-        pass
+    def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+        self.on_mouse_motion(x, y, dx, dy)
 
-    def on_mouse_release(self, a, b, c):
-        pass
+    def on_mouse_press(self, x, y, buttons, modifiers):
+        self.state["attacking"] = True
+        #print "[CONTROLS] Mouse key pressed: ", a, b, c,
+
+    def on_mouse_release(self, x, y, buttons,  modifiers):
+        self.state["attacking"] = False
 
     def on_joyaxis_motion(self, axis, value):
         #print "Recieved joystick input"

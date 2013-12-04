@@ -14,12 +14,12 @@ def new_entity(entity):
 
     logger.info("Loading entity type with name '%s'", entity.name)
     name = entity.name
-    
+
     if name in types.items(): #Something with the same name has already been loaded, append _2 to the name
         logger.warning("Entity with name '%s' already exists", name)
         entity.name = entity.name + "_2"
         name = name + "_2"
-    
+
     types[name] = entity
 
 
@@ -88,12 +88,6 @@ class Entity(object):
 
         if self.attack_cooldown >= 0:
             self.attack_cooldown -= t
-
-        #update display accordingly
-        if self.sprite:
-            #Interpolation
-            self.sprite.position = (self.sprite.position + self.position) / 2
-            self.sprite.rotation = (self.sprite.rotation + self.rotation) / 2
 
     def update_from_json(self, json):
         for k, v in json.items():
