@@ -1,13 +1,19 @@
 import socket
 import json
 import collections
+import logging
 
 import entity.entity
+from multiplayer import json_decode, jsonEncoder
 from game.game import game  # Yeeeaaah.... Time to figure out python packages!
 
+logger = logging.getLogger("server")
+
 server = None
-clients = {}  # (addr, player eid)
+clients = {}  # (addr, player eid, client id)
 old_data = ""
+
+
 
 
 def add_client(addr):
@@ -23,7 +29,7 @@ def recieve():
             pass
     else:
         if raw_data:
-            print "[SERVER] Recieved data from %s: %s" % (addr, raw_data)
+            logger.info("Recieved data from %s: %s", addr, raw_data)
             if not addr in clients.keys():  # A new client connecting
                 on_new_client(addr)
 
@@ -31,13 +37,17 @@ def recieve():
 
 
 def on_new_client(addr):
-    print "A new client connected, lets create a new player for them"
+    logger.info("A new client connected, lets create a new player for them")
     #Create a new player for them
+    client_id = len(clients)+1
+
     e = entity.player.Player()
     e.local = False
+    e.controlled_by = client_id
     game.spawn(e)
+    print "e.eid is: ", e.eid
 
-    clients[addr] = (addr, e.eid)
+    clients[addr] = (addr, e.eid, client_id)
     send("set_control", {"eid": e.eid})
 
 
@@ -66,17 +76,23 @@ def send(command, data, to=None):
     if not isinstance(to, collections.Iterable):
         to = (to)
 
-    msg = json.dumps({
+    data = {
         "command": command,
         "data": data,
-        "tick": game.tick})
+        "tick": game.tick
+    }
+
+    msg = json.dumps(data, cls=jsonEncoder)
+    logger.info("Sending: %s", msg)
+
 
     for client in to:
         _send(client[0], msg)
 
 
 def handle_data(client, raw_data):
-    data = json.loads(raw_data)
+    data = json.loads(raw_data, object_hook=json_decode)
+    logger.info("Handling data: %s", data)
 
     #Perform the command --this part is equal in server and client. Should have
     #common function in base class
@@ -85,25 +101,25 @@ def handle_data(client, raw_data):
         d = data["data"]
         eid = d["eid"]
         entity = game.get_entity(eid)
-        for k, v in d.items():
-            if isinstance(v, dict):  # The value is an object and must be constructed
-                if v["type"] == "Vector2":
-                    args = v["args"]
-                    import cocos.euclid
-                    v = cocos.euclid.Vector2(args[0], args[1])
-                else:
-                    print "[WARNING] Client recieved undefined data type"  # Should ignore it most likely
-                    continue
-            setattr(entity, k, v)  # YOLO
 
     elif data["command"] == "update_controls":  # The client wants to update the state of his controls
+        d = data["data"]
+        tick = d["tick"]
+        state = d["state"]
+        position = d["position"]
+
         e = game.get_entity(client[1])
-        e.update_input(data["data"])
+        if position:
+            e.position = position
+        e.update_input(state)
+        tick = max(0, game.tick - tick) / 100.0
+        #print "tick: ", tick
+        e.update(tick)
 
 
 def send_world():
     for e in game.entities.values():
-        send("update", e.to_json())
+        send("update", e)
 
 
 def update(t):

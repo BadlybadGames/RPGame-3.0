@@ -2,13 +2,15 @@ import cocos
 from cocos.director import director
 from cocos import collision_model as cm
 
+import logging
+from collections import namedtuple
+
 import entity.player
 import equipment
 
 
 game = None
 layer = None
-
 
 def start():
     global game
@@ -18,12 +20,9 @@ def start():
     layer = cocos.layer.Layer()
     game = Game()
 
-    player = entity.player.Player(position=(200, 200))
+    player = entity.player.Player()
+    player.position.x, player.position.y = (200,200)
     player.weapon = equipment.BowWeapon(player)
-
-    enemy = entity.BasicEnemy(position=(400, 400))
-
-    game.spawn(enemy)
 
     #Setup controls
     import interface.controls  # TODO: Add init functions for modules so late import isnt needed
@@ -33,6 +32,7 @@ def start():
     game.spawn(player)
     game.set_player(player.eid)
     layer.schedule(game.update)
+    layer.schedule(game.update_render)
 
     return layer
 
@@ -63,14 +63,28 @@ class Game():
 
         #Assuming all entities have collision
         for e in self.entities.values():
-            e.update_collision()
-            self.collision.add(e)
+            # The collision detection requires objects with .cshape attributes, so we do this.
+            obj = namedtuple('Shape', ("cshape", "entity"))
+            obj.cshape = cm.CircleShape(center=e.position, r=e.size)
+            obj.entity = e
+            self.collision.add(obj)
 
         self.run_collision()
 
+    def update_render(self, t):
+        for e in self.entities.values():
+            if e.sprite:
+                #Interpolation
+                #Interpolate over 0.5 seconds
+                v = e.sprite.position - e.position
+                e.sprite.position += v / 2.0
+                e.sprite.rotation = (e.sprite.rotation + e.rotation) / 2
+
     def run_collision(self):
         for a, b in self.collision.iter_all_collisions():
-            print "Collision!"
+            a = a.entity
+            b = b.entity
+            logging.info("Collision between %i and %i", a.eid, b.eid)
             #check if the types of the two should result in collision
             if any((a.etype == "projectile" and b.etype == "projectile",)):
                 continue
@@ -99,10 +113,9 @@ class Game():
             anchor = self.get_entity(e.attached_to)
             anchor.sprite.add(e.sprite)
         else:
-            print "added: ", e.sprite
             layer.add(e.sprite)
 
     def despawn(self, e):
         if e.sprite:
-            print "Want to remove: ", e.sprite
+            logging.info("Want to remove: ", e.sprite)
             layer.remove(e.sprite)

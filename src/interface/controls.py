@@ -10,8 +10,8 @@ control = None
 def init():
     global control
 
-    control = GamepadController()
-    #control = PlayerController()
+    #control = GamepadController()
+    control = PlayerController()
     return control
 
 
@@ -42,7 +42,7 @@ class PlayerController(Controller):
 
     def on_key_press(self, key, modifiers):
         skey = pyglet.window.key.symbol_string(key)  # String representation of the key
-        print "[CONTROLS] Key pressed: ", skey
+        #print "[CONTROLS] Key pressed: ", skey
 
         updated = False
 
@@ -60,14 +60,16 @@ class PlayerController(Controller):
                 self.state["movement"][1] -= 1
 
         if updated:
-            game.get_player().update_input(self.state)
+            player = game.get_player()
+            if player:
+                player.update_input(self.state)
             return True
         else:
             return False
 
     def on_key_release(self, key, modifiers):
         skey = pyglet.window.key.symbol_string(key)  # String representation of the key
-        print "[CONTROLS] Key released: ", skey
+        #print "[CONTROLS] Key released: ", skey
 
         updated = False
         if skey in ("A", "D", "W", "S"):
@@ -84,7 +86,9 @@ class PlayerController(Controller):
                 self.state["movement"][1] += 1
 
         if updated:
-            game.get_player().update_input(self.state)
+            player = game.get_player()
+            if player:
+                player.update_input(self.state)
             return True
         else:
             return False
@@ -92,7 +96,9 @@ class PlayerController(Controller):
     def on_mouse_motion(self, x, y, dx, dy):
         self.state["updated"] = True
 
-        player = game.get_player()
+        player = player = game.get_player()
+        if player:
+            player
 
         px, py = player.position
         fx, fy = x - px, y - py
@@ -100,17 +106,21 @@ class PlayerController(Controller):
         self.state["aim"][0] = fx
         self.state["aim"][1] = fy
 
-        game.get_player().update_input(self.state)
+        player = game.get_player()
+        if player:
+            player.update_input(self.state)
         return True
 
     def on_mouse_press(self, a, b, c):
-        print "[CONTROLS] Mouse key pressed: ", a, b, c,
+        #print "[CONTROLS] Mouse key pressed: ", a, b, c,
+        pass
 
     def on_mouse_release(self, a, b, c):
         pass
 
     def on_joyaxis_motion(self, axis, value):
-        print "Recieved joystick input"
+        #print "Recieved joystick input"
+        pass
 
 
 class GamepadController(Controller):
@@ -129,7 +139,7 @@ class GamepadController(Controller):
         self.joy.open()
 
     def on_joyaxis_motion(self, joystick, axis, value):
-        print "Recieved joystick input: ", repr(axis), repr(value)
+        #print "Recieved joystick input: ", repr(axis), repr(value)
 
         updated = False
 
@@ -160,21 +170,28 @@ class GamepadController(Controller):
             self.state["aim"] = x, y
 
         if updated:
-            game.get_player().update_input(self.state)
+            player = game.get_player()
+            if player:
+                player.update_input(self.state)
 
     def on_joyhat_motion(self, joystick, hat_x, hat_y):
-        print "Recieved joystick input: ", hat_x, hat_y
+        #print "Recieved joystick input: ", hat_x, hat_y
+        pass
 
     def on_joybutton_press(self, joystick, button):
-        print "joybutton press: ", button
+        #print "joybutton press: ", button
         if button == 5:
             self.state["attacking"] = True
 
-        game.get_player().update_input(self.state)
+        player = game.get_player()
+        if player:
+            player.update_input(self.state)
 
     def on_joybutton_release(self, joystick, button):
-        print "joybutton release: ", button
+        #print "joybutton release: ", button
         if button == 5:
             self.state["attacking"] = False
 
-        game.get_player().update_input(self.state)
+        player = game.get_player()
+        if player:
+            player.update_input(self.state)

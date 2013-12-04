@@ -1,13 +1,39 @@
+import logging
+
 import cocos
 from cocos import euclid
 
+logger = logging.getLogger("entity")
+
+types = {}
+
+def new_entity(entity):
+    global types
+
+    assert hasattr(entity, "name"), "Entities need a unique name"
+
+    logger.info("Loading entity type with name '%s'", entity.name)
+    name = entity.name
+    
+    if name in types.items(): #Something with the same name has already been loaded, append _2 to the name
+        logger.warning("Entity with name '%s' already exists", name)
+        entity.name = entity.name + "_2"
+        name = name + "_2"
+    
+    types[name] = entity
+
+
+def load_data():
+    """Loads entity data from data files"""
+    execfile("player.py")
+    execfile("npc.py")
 
 class Entity(object):
     """An entity found in the game world"""
 
     etype = "Entity"
 
-    def __init__(self, position):
+    def __init__(self, position=(0,0)):
         self.is_player = False
         if self.image:
             self.sprite = cocos.sprite.Sprite(self.image)
@@ -24,6 +50,9 @@ class Entity(object):
         self.turn_speed = 400  # Degrees/second
         self.aim = (30, 30)  # Our desired point of target
         self.size = 32
+
+        #which player_id it is controlled by. 0 means server
+        self.controlled_by = 0
 
         #init sprite position too
         if self.sprite:
@@ -67,14 +96,13 @@ class Entity(object):
             self.sprite.rotation = (self.sprite.rotation + self.rotation) / 2
 
     def update_from_json(self, json):
-        self.interpolate(json)
         for k, v in json.items():
             if k == "eid":  # We dont want to update an eid after the entity has been made. Especially not if its from a client
                 continue
 
-            if isinstance(v, dict):  # The value requires a construction of a type
-                if v["type"] == "Vector2":
-                    v = euclid.Vector2(v["args"][0], v["args"][1])
+            # if isinstance(v, dict):  # The value requires a construction of a type
+            #     if v["type"] == "Vector2":
+            #         v = euclid.Vector2(v["args"][0], v["args"][1])
             setattr(self, k, v)
 
     def to_json(self):
@@ -91,8 +119,6 @@ class Entity(object):
             if callable(v):  # Ignore functions
                 continue
 
-            if isinstance(v, euclid.Vector2):
-                d[k] = {"type": "Vector2", "args": (v.x, v.y)}
             else:
                 d[k] = v
         return d

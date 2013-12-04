@@ -1,19 +1,20 @@
 from cocos import euclid
 from cocos import collision_model as cm
 
-import entity
 import util
+
+import entity
 
 
 class Player(entity.Entity):
 
-    etype = "player"
+    name = "player"
 
-    def __init__(self, position):
+    def __init__(self):
         self.entity_name = "player"
         self.image = "player.png"
 
-        super(Player, self).__init__(position)
+        super(Player, self).__init__()
 
         self.is_player = True
         self.local = True  # TODO: This might be a little dirty
@@ -57,3 +58,5 @@ class Player(entity.Entity):
 
         if self.move_dir.magnitude() > 1:
             self.move_dir.normalize()  # We only want the direction (at least when using a keyboard)
+
+entity.new_entity(Player)
