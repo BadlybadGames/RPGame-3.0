@@ -3,6 +3,7 @@ import pyglet
 from cocos.director import director
 import cocos.menu as menu
 
+import entity
 
 class MainMenu(cocos.menu.Menu):
 
@@ -40,6 +41,17 @@ class MainMenu(cocos.menu.Menu):
 
         scene.add(game.game.start())
         scene.add(multiplayer.host())
+
+        g = game.game.game
+
+        player = entity.get_entity_type("player")()
+        player.position.x, player.position.y = (200, 200)
+
+        g.spawn(player)
+        g.set_player(player.eid)
+
+        bow = entity.get_entity_type("BasicBow")(player)
+        player.weapon = bow
 
         director.push(scene)
 

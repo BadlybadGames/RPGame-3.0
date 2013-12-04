@@ -45,14 +45,15 @@ def send(command, data):
 
 def handle_data(raw_data):
     #print "[CLIENT] Recieved data, json: ", raw_data
+    logger.info("Recieved data from server: %s", raw_data)
     data = json.loads(raw_data, object_hook = json_decode)
 
     if data["command"] == "update":
         #Time to update an entity
         tick = data["tick"]
 
-        e_data = data["data"]["Entity"]
-        eid = e_data["eid"]
+        entity = data["data"]
+        eid = entity.eid
 
         #check for tick
         if not tick in entity_ticks.keys():  # First time we recieve a tick
@@ -65,14 +66,13 @@ def handle_data(raw_data):
         e = game.get_entity(eid)
 
         if not e:
-            e = entity.types[e_data["name"]]()
-            game.spawn(e)
-            e.from_json(e_data)
+            game.spawn(entity)
+            #e.from_json(entity)
         else:
-            if e.eid == game.controlled_player: # TODO: This shouldnt even be sent from the server
+            if e.eid == game.get_player(): # TODO: This shouldnt even be sent from the server
                 pass
             else:
-                e.update_from_json(e_data)
+                e.update_from(entity) # TODO: This is kinda weird.
 
     elif data["command"] == "set_control":
         d = data["data"]

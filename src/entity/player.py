@@ -6,7 +6,7 @@ import util
 import entity
 
 
-class Player(entity.Entity):
+class Player(entity.WorldEntity):
 
     name = "player"
 

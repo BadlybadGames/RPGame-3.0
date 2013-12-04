@@ -6,7 +6,7 @@ import ai
 import logging
 
 
-class npc(entity.Entity):
+class npc(entity.WorldEntity):
 
     ai = ai.BasicEnemyAi
     etype = "enemy"

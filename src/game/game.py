@@ -17,30 +17,21 @@ def start():
     global game
     global layer
 
-    #load game data
-    entity.load_data()
-
     #Setup the game
     layer = cocos.layer.Layer()
     game = Game()
+
+    #load game data
+    entity.load_data()
 
     batch = cocos.batch.BatchNode()
     game.sprite_batch = batch
     layer.add(batch)
 
-    player = entity.get_entity_type("player")()
-    player.position.x, player.position.y = (200, 200)
-
     #Setup controls
     import interface.controls  # TODO: Add init functions for modules so late import isnt needed
     c = interface.controls.init()
     layer.add(c)
-
-    game.spawn(player)
-    game.set_player(player.eid)
-    
-
-
 
     layer.schedule(game.update)
     layer.schedule(game.update_render)
@@ -59,6 +50,7 @@ class Game():
         self.entities = {}
         self.controlled_player = None
         self.tick = 0
+        self.entity_count = 0
 
         w, h = director.get_window_size()
         cell_size = 64*1.25  # The size used for grids for the collision manager
@@ -121,7 +113,8 @@ class Game():
 
     def spawn(self, e):
         if not hasattr(e, "eid"):
-            e.eid = len(self.entities) + 1
+            e.eid = self.entity_count + 1
+            self.entity_count += 1
         self.entities[e.eid] = e
 
         if e.attached_to:
@@ -129,13 +122,13 @@ class Game():
             anchor.sprite.add(e.sprite)
         else:
             if e.image:
-                e.sprite = cocos.sprite.Sprite(e.image)
+                e.sprite = cocos.sprite.Sprite(str(e.image))
                 self.sprite_batch.add(e.sprite)
 
     def despawn(self, e):
         if e.sprite:
-            logging.info("Want to remove: ", e.sprite)
             self.sprite_batch.remove(e.sprite)
+        del self.entities[e.eid]
 
     def get_entity_type(self, name):
         return entity.types["name"]

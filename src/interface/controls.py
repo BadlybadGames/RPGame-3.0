@@ -97,8 +97,8 @@ class PlayerController(Controller):
         self.state["updated"] = True
 
         player = player = game.get_player()
-        if player:
-            player
+        if not player:
+            return
 
         px, py = player.position
         fx, fy = x - px, y - py
@@ -106,9 +106,8 @@ class PlayerController(Controller):
         self.state["aim"][0] = fx
         self.state["aim"][1] = fy
 
-        player = game.get_player()
-        if player:
-            player.update_input(self.state)
+
+        player.update_input(self.state)
         return True
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):

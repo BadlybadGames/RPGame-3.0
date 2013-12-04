@@ -45,7 +45,6 @@ def on_new_client(addr):
     e.local = False
     e.controlled_by = client_id
     game.spawn(e)
-    print "e.eid is: ", e.eid
 
     clients[addr] = (addr, e.eid, client_id)
     send("set_control", {"eid": e.eid})
@@ -69,6 +68,9 @@ def send(command, data, to=None):
     Data is sent as a '{lengthofdata}|{json}' string
 
     """
+
+    if not clients: #no need to send anything if there are no clients
+        return
 
     if not to:
         to = clients.values()

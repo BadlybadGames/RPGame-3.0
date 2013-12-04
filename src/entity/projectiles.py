@@ -2,11 +2,11 @@ import entity
 from cocos import collision_model as cm
 
 
-class Projectile(entity.Entity):
+class Projectile(entity.WorldEntity):
     image = "arrow.png"
 
     etype = "projectile"
-    name = "projectile"
+    name = "Projectile"
 
     def __init__(self, **kwargs):
         super(Projectile, self).__init__()

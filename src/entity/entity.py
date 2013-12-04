@@ -33,42 +33,22 @@ def load_data():
     import npc
     import projectiles
     import weapon
+    import equipment
 
 class Entity(object):
-    """An entity found in the game world"""
+    """A physical or abstract entity
+
+    Physical entites should derive from WorldEntity and will in general be spawned by game
+    Abstract entities are simply abstract data that need to be able to be serialized
+    """
 
     etype = "Entity"
 
-    def __init__(self, position=(0,0)):
+    def __init__(self):
         self.is_player = False
-        if self.image:
-            self.sprite = cocos.sprite.Sprite(self.image)
-
-        self.attached_to = None
-
-        #Movement variables
-        self.position = euclid.Vector2(*position)
-        self.rotation = 0
-        self.mov_vel = euclid.Vector2(0.0, 0.0)
-        self.mov_acc = euclid.Vector2(0.0, 0.0)
-        self.move_dir = euclid.Vector2(0.0, 0.0)
-        self.acc_speed = 200
-        self.turn_speed = 400  # Degrees/second
-        self.aim = (30, 30)  # Our desired point of target
-        self.size = 32
 
         #which player_id it is controlled by. 0 means server
         self.controlled_by = 0
-
-        #init sprite position too
-        if self.sprite:
-            self.sprite.position = self.position
-            self.sprite.rotation = self.rotation
-
-        self.attacking = False
-        self.attack_cooldown = 0.0
-
-        self.dead = False
 
     @classmethod
     def from_json(cls, json):
@@ -104,6 +84,23 @@ class Entity(object):
             #         v = euclid.Vector2(v["args"][0], v["args"][1])
             setattr(self, k, v)
 
+    def update_from(self, new):
+        # Updates self based on a new entity it should become
+        for k in dir(new):
+            if k.startswith("_"):  # Ignore builtins
+                continue
+
+            if k in ("sprite",):
+                continue
+
+            v = getattr(new, k)
+
+            if callable(v):  # Ignore functions
+                continue
+
+            else:
+                setattr(self, k, v)
+
     def to_json(self):
         d = {}
         for k in dir(self):
@@ -122,6 +119,30 @@ class Entity(object):
                 d[k] = v
         return d
 
+class WorldEntity(Entity):
+    """A physical entity that usually has a physical appearance"""
+
+    def __init__(self, position=(0,0)):
+        super(WorldEntity, self).__init__()
+
+        self.attached_to = None
+
+        #Movement variables
+        self.position = euclid.Vector2(*position)
+        self.rotation = 0
+        self.mov_vel = euclid.Vector2(0.0, 0.0)
+        self.mov_acc = euclid.Vector2(0.0, 0.0)
+        self.move_dir = euclid.Vector2(0.0, 0.0)
+        self.acc_speed = 200
+        self.turn_speed = 400  # Degrees/second
+        self.aim = (30, 30)  # Our desired point of target
+        self.size = 32
+
+        self.attacking = False
+        self.attack_cooldown = 0.0
+
+        self.dead = False
+
     def die(self):
         if not self.dead:
             from game.game import game
@@ -130,4 +151,3 @@ class Entity(object):
 
     def on_collision(self, other):
         pass
-

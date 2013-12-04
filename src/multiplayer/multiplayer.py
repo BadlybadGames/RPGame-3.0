@@ -6,7 +6,6 @@ import cocos
 from cocos import euclid
 
 import entity
-import equipment
 
 class jsonEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -15,8 +14,6 @@ class jsonEncoder(json.JSONEncoder):
         elif isinstance(obj, entity.Entity):
             d = entity.Entity.to_json(obj)
             return {"Entity":d}
-        elif isinstance(obj, equipment.equipment.Equipment): # TODO: Fix/add this
-            return False
         return json.JSONEncoder.default(self, obj)
 
 
@@ -24,11 +21,12 @@ def json_decode(obj):
     if "Vector2" in obj:
         data = obj["Vector2"]
         return euclid.Vector2(data[0],data[1])
-    # if "Entity" in obj:
-    #     data = obj["Entity"]
-    #     e = entity.types[data["name"]]() # make an instance from the proper entity class
-    #     for k, v in data.items():
-    #         setattr(e, k, v)
+    if "Entity" in obj:
+        data = obj["Entity"]
+        e = entity.types[data["name"]]() # make an instance from the proper entity class
+        for k, v in data.items():
+            setattr(e, k, v)
+        return e
     return obj
 
 
