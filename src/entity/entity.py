@@ -57,8 +57,10 @@ class Entity(object):
         e.update_from_json(json)
         return e
 
-    def update(self, t):
-        #Set our acceleration according to user input
+
+    def update_movement(self, t):
+        """This is called by update and explicitly by the server when updating 
+        input from clients"""
         self.mov_acc = self.move_dir * self.acc_speed
 
         self.position += self.mov_vel * t + (self.mov_acc * t / 2)
@@ -66,6 +68,11 @@ class Entity(object):
 
         #perform friction. Improve pls!
         self.mov_vel = self.mov_vel * ((1 - t) * 0.5)
+
+
+    def update(self, t):
+        #Set our acceleration according to user input
+        self.update_movement(t)
 
         #See if we want to and can attack
         if self.attacking and self.attack_cooldown < 0:

@@ -96,7 +96,7 @@ class PlayerController(Controller):
     def on_mouse_motion(self, x, y, dx, dy):
         self.state["updated"] = True
 
-        player = player = game.get_player()
+        player = game.get_player()
         if not player:
             return
 

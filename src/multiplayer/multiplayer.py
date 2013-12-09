@@ -7,6 +7,18 @@ from cocos import euclid
 
 import entity
 
+N_SET_PLAYER = 0
+N_UPDATE = 1
+N_SET_CONTROL = 2
+
+IS_MULTIPLAYER = False
+IS_SERVER = False
+
+#Update interval in ms
+SERVER_UPDATE_INTERVAL = 1.0 / 30.0
+CLIENT_UPDATE_INTERVAL = 1.0 / 30.0
+
+#Serialization
 class jsonEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, euclid.Vector2):
@@ -15,7 +27,6 @@ class jsonEncoder(json.JSONEncoder):
             d = entity.Entity.to_json(obj)
             return {"Entity":d}
         return json.JSONEncoder.default(self, obj)
-
 
 def json_decode(obj):
     if "Vector2" in obj:
@@ -28,17 +39,6 @@ def json_decode(obj):
             setattr(e, k, v)
         return e
     return obj
-
-
-
-IS_MULTIPLAYER = False
-IS_SERVER = False
-
-#Update interval in ms
-SERVER_UPDATE_INTERVAL = 1.0 / 30.0
-CLIENT_UPDATE_INTERVAL = 1.0 / 30.0
-
-
 
 def host():
     """host -> CClayer

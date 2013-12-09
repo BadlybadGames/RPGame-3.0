@@ -6,6 +6,7 @@ import logging
 from collections import namedtuple
 
 import entity
+import events
 
 LERP_TIME =  0.1
 LERP_MAX_VEL = 80
@@ -47,6 +48,7 @@ class Game():
     """
 
     def __init__(self):
+        self.player_id = 0 # Our client id, 0 means server/single player/not yet set.
         self.entities = {}
         self.controlled_player = None
         self.tick = 0
@@ -111,7 +113,21 @@ class Game():
     def set_player(self, eid):
         self.controlled_player = eid
 
-    def spawn(self, e):
+    def set_player_id(self, i):
+        self.player_id = i
+
+    def get_player_id(self):
+        return self.player_id
+
+    def is_controlled(self, entity):
+        return entity.controlled_player == self.get_player_id()
+
+    def spawn(self, e, force=False):
+        if not force:
+            # First figure out if we should spawn
+            if not e.controlled_by == self.get_player_id() and not self.get_player_id() == 0:
+               return
+
         if not hasattr(e, "eid"):
             e.eid = self.entity_count + 1
             self.entity_count += 1
@@ -126,6 +142,7 @@ class Game():
                 self.sprite_batch.add(e.sprite)
 
     def despawn(self, e):
+        print "deleting: ", e.eid
         if e.sprite:
             self.sprite_batch.remove(e.sprite)
         del self.entities[e.eid]

@@ -2,6 +2,7 @@ from cocos import euclid
 import util
 from game.game import game
 import entity
+import events
 
 class Equipment(entity.Entity):
     pass
@@ -30,12 +31,14 @@ class BowWeapon(Weapon):
     def attack(self):
         wielder = self.get_wielder()
         e = entity.get_entity_type("Projectile")()
+        e.controlled_by = wielder.controlled_by
         e.position = wielder.position.copy()
         e.duration = self.proj_life
         e.rotation = wielder.rotation
         e.move_dir = euclid.Vector2(*util.rot_to_vec(e.rotation))
 
         game.spawn(e)
+        events.dispatch("on_shoot", e)
 
 
 class MeleeWeapon(Weapon):

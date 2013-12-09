@@ -4,7 +4,7 @@ import collections
 import logging
 
 import entity.entity
-from multiplayer import json_decode, jsonEncoder
+from multiplayer import *
 from game.game import game  # Yeeeaaah.... Time to figure out python packages!
 
 logger = logging.getLogger("server")
@@ -12,8 +12,6 @@ logger = logging.getLogger("server")
 server = None
 clients = {}  # (addr, player eid, client id)
 old_data = ""
-
-
 
 
 def add_client(addr):
@@ -43,12 +41,18 @@ def on_new_client(addr):
 
     e = entity.player.Player()
     e.local = False
-    e.controlled_by = client_id
+
     game.spawn(e)
+    e.controlled_by = client_id
+
+    bow = entity.get_entity_type("BasicBow")(e)
+    e.weapon = bow
 
     clients[addr] = (addr, e.eid, client_id)
     send("set_control", {"eid": e.eid})
-
+    send("set_player", {"player":client_id})
+    send("update", e)
+    send("set_tick", {"tick":game.tick})
 
 def _send(addr, data):
     """send(addr, data) -> packet size
@@ -65,7 +69,6 @@ def _send(addr, data):
 def send(command, data, to=None):
     """Send data to one or multiple clients.
 
-    Data is sent as a '{lengthofdata}|{json}' string
 
     """
 
@@ -116,12 +119,25 @@ def handle_data(client, raw_data):
         e.update_input(state)
         tick = max(0, game.tick - tick) / 100.0
         #print "tick: ", tick
-        e.update(tick)
+        e.update_movement(tick)
 
+    elif data["command"] == "spawn_entity":
+        entity = data["data"]
+        if hasattr(entity, eid):
+            logger.warning("Client sent a spawn_entity with an entity with eid")
+            delattr(entity, eid)
+        game.spawn(entity)
+        d = {
+            "packet_id": data["packet_id"],
+            "eid":entity.eid
+        }
+        send("success", d)
 
 def send_world():
     for e in game.entities.values():
-        send("update", e)
+        to = [c for c in clients.values() if not e.controlled_by == c[2]] # Don't send updates about their own controlled stuff
+        if to:
+            send("update", e, to)
 
 
 def update(t):
