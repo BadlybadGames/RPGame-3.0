@@ -18,15 +18,25 @@ packet_id = 0
 packet_hooks = {}  # Function callbacks
 entity_ticks = {}  # Last tick we recieved updates for entities
 
-#def init_handlers():
-#    class ClientHandler():
-#        def on_shoot(self, entity):
-#            if game.is_owned(entity):
-#                def reply_callback(data):
-#                    if game.get_entity(data)
-#                send("spawn_entity", e)
-#
-#    events.handler.push_handler()
+def init_handlers():
+    class ClientHandler(object):
+        def on_shoot(self, entity):
+            if game.is_controlled(entity):
+                def reply_callback(eid):
+                    new_entity = game.get_entity(eid)
+                    if new_entity: # Might happen if a packet is lost
+                        # TODO: Some trouble here (i.e if packet is lost)
+                        new_entity.sprite.kill()
+                        new_entity.sprite = entity.sprite
+                    else:
+                        game.entities[eid] = entity
+
+                packet_id = send("spawn_entity", entity)
+                packet_hooks[packet_id] = reply_callback
+
+    events.handler.push_handlers(ClientHandler())
+
+init_handlers()
 
 def recieve():
     """Check for data from server"""
@@ -60,6 +70,8 @@ def send(command, data, callback=None):
     
     logging.info("Sending msg: " + msg)
     server.send(msg)
+
+    return packet_id
 
 
 def handle_data(raw_data):
@@ -112,9 +124,11 @@ def handle_data(raw_data):
         d = data["data"]
         tick = d["tick"]
         game.tick = tick
-    elif data["command"] == "success":
-        pass # NYI
-    
+    elif data["command"] == "accept_attack":
+        d = data["data"]
+        packet_id = d["packet_reference"]
+        eid = d["eid"]
+        packet_hooks[packet_id](eid)    
 
     else:
         assert(False, "We recieved a command but have no idea what to do with it")

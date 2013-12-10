@@ -49,10 +49,12 @@ def on_new_client(addr):
     e.weapon = bow
 
     clients[addr] = (addr, e.eid, client_id)
-    send("set_control", {"eid": e.eid})
-    send("set_player", {"player":client_id})
+    to = [clients[addr]]
+
+    send("set_control", {"eid": e.eid}, to=to)
+    send("set_player", {"player":client_id}, to=to)
     send("update", e)
-    send("set_tick", {"tick":game.tick})
+    send("set_tick", {"tick":game.tick}, to=to)
 
 def _send(addr, data):
     """send(addr, data) -> packet size
@@ -123,15 +125,15 @@ def handle_data(client, raw_data):
 
     elif data["command"] == "spawn_entity":
         entity = data["data"]
-        if hasattr(entity, eid):
+        if hasattr(entity, "eid"):
             logger.warning("Client sent a spawn_entity with an entity with eid")
-            delattr(entity, eid)
-        game.spawn(entity)
+            delattr(entity, "eid")
+        game.spawn(entity, force=True)
         d = {
-            "packet_id": data["packet_id"],
+            "packet_reference": data["packet_id"],
             "eid":entity.eid
         }
-        send("success", d)
+        send("accept_attack", d, to=[clients[client[0]]]) # TODO: Having to list this is silly. Gotta improve _send
 
 def send_world():
     for e in game.entities.values():

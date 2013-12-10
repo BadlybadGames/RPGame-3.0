@@ -50,9 +50,11 @@ class Game():
     def __init__(self):
         self.player_id = 0 # Our client id, 0 means server/single player/not yet set.
         self.entities = {}
+        self.local_entities = {}
         self.controlled_player = None
         self.tick = 0
         self.entity_count = 0
+        self.local_entity_count = 0
 
         w, h = director.get_window_size()
         cell_size = 64*1.25  # The size used for grids for the collision manager
@@ -120,18 +122,27 @@ class Game():
         return self.player_id
 
     def is_controlled(self, entity):
-        return entity.controlled_player == self.get_player_id()
+        return entity.controlled_by == self.get_player_id()
+
+    def is_client(self):
+        return self.player_id != 0
 
     def spawn(self, e, force=False):
         if not force:
             # First figure out if we should spawn
-            if not e.controlled_by == self.get_player_id() and not self.get_player_id() == 0:
+            if not e.controlled_by == self.get_player_id():
                return
 
-        if not hasattr(e, "eid"):
-            e.eid = self.entity_count + 1
-            self.entity_count += 1
-        self.entities[e.eid] = e
+        if not force and self.is_client(): # We need confirmation from the server
+            if not hasattr(e, "eid"):
+                e.eid = self.local_entity_count + 1
+                self.local_entity_count += 1
+            self.local_entities[e.eid] = e
+        else:
+            if not hasattr(e, "eid"):
+                e.eid = self.entity_count + 1
+                self.entity_count += 1
+            self.entities[e.eid] = e
 
         if e.attached_to:
             anchor = self.get_entity(e.attached_to)
@@ -142,10 +153,13 @@ class Game():
                 self.sprite_batch.add(e.sprite)
 
     def despawn(self, e):
-        print "deleting: ", e.eid
         if e.sprite:
             self.sprite_batch.remove(e.sprite)
-        del self.entities[e.eid]
+        if e.eid in self.local_entities.keys():
+            del self.local_entities[e.eid]
+        else:
+            if e.eid in self.entities.keys(): # TODO: Figure out why this is sometimes not the case
+                del self.entities[e.eid]
 
     def get_entity_type(self, name):
         return entity.types["name"]
