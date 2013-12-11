@@ -2,18 +2,22 @@ import cocos
 from cocos.director import director
 
 import logging
+import logging.config
 import sys
+import json
 
 import interface.menus
 
 def init_logging():
-	logging.basicConfig(format='[%(levelname)s]%(name)s:%(lineno)d> %(message)s', filename='debug.log',level=logging.DEBUG)
-	f = open("error.log", "w")
-	sys.stderr = f
-	log_server = logging.getLogger("server")
-	log_server.format = '[Server][%(levelname)s]%(name)s:%(lineno)d> %(message)s'
-	log_client = logging.getLogger("client")
-	log_client.format = '[Client][%(levelname)s]%(name)s:%(lineno)d> %(message)s'
+    with open("logging.json", 'rt') as f:
+        config = json.load(f)
+    logging.config.dictConfig(config)
+    f = open("error.log", "w")
+    sys.stderr = f
+    log_server = logging.getLogger("server")
+    log_server.format = '[Server][%(levelname)s]%(name)s:%(lineno)d> %(message)s'
+    log_client = logging.getLogger("client")
+    log_client.format = '[Client][%(levelname)s]%(name)s:%(lineno)d> %(message)s'
 
 init_logging()
 
