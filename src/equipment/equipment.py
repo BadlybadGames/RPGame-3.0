@@ -48,11 +48,23 @@ class MeleeWeapon(Weapon):
         super(MeleeWeapon, self).__init__(wielder)
 
         self.width = 5
-        self.length = 50
+        self.arc = 120
         self.duration = 1.0
+        self.attack_speed = 1.1
 
     def attack(self):
-        e = entity.get_entity_type("MeleeWeaponEntity")
+        real_wielder = self.get_wielder() # The real entity (not the eid)
+        e = entity.get_entity_type("MeleeWeaponEntity")()
+        e.wielder = self.wielder
+        e.controlled_by = real_wielder.controlled_by
+        e.position = real_wielder.position.copy()
+        e.duration = self.duration
+        e.duration_left = e.duration
+        e.arc = self.arc
+        e.rotation_off = -self.arc/80.0
+
+        game.spawn(e)
+        events.dispatch("on_shoot", e)
 
 weapons = (BowWeapon, MeleeWeapon)
 

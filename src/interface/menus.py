@@ -50,8 +50,8 @@ class MainMenu(cocos.menu.Menu):
         g.spawn(player)
         g.set_player(player.eid)
 
-        bow = entity.get_entity_type("BasicBow")(player)
-        player.weapon = bow
+        sword = entity.get_entity_type("BasicMeleeWeapon")(player)
+        player.weapon = sword
 
         director.push(scene)
 
