@@ -65,11 +65,11 @@ class Game():
 
         #Update position then velocity
         self.tick += t
-        for i in self.entities.values():
+        for i in self.get_entities():
             self.update_entity(i, t)
 
         #Assuming all entities have collision
-        for e in self.entities.values():
+        for e in self.get_entities():
             # The collision detection requires objects with .cshape attributes, so we do this.
             obj = namedtuple('Shape', ("cshape", "entity"))
             obj.cshape = cm.CircleShape(center=e.position, r=e.size)
@@ -79,7 +79,7 @@ class Game():
         self.run_collision()
 
     def update_render(self, t):
-        for e in self.entities.values():
+        for e in self.get_entities():
             if e.sprite:
                 #Interpolation
                 #Interpolate over LERP_TIME
@@ -111,6 +111,9 @@ class Game():
 
     def get_player(self):
         return self.get_entity(self.controlled_player)
+
+    def get_entities(self):
+        return (e for e in self.entities.values() + self.local_entities.values() if e)
 
     def set_player(self, eid):
         self.controlled_player = eid
@@ -155,11 +158,11 @@ class Game():
     def despawn(self, e):
         if e.sprite:
             self.sprite_batch.remove(e.sprite)
+            e.sprite = None
         if e.eid in self.local_entities.keys():
-            del self.local_entities[e.eid]
-        else:
-            if e.eid in self.entities.keys(): # TODO: Figure out why this is sometimes not the case
-                del self.entities[e.eid]
+            self.local_entities[e.eid] = None # It is now dead
+        if e.eid in self.entities.keys():
+            self.entities[e.eid] = None # DEAD!
 
     def get_entity_type(self, name):
         return entity.types["name"]

@@ -136,7 +136,7 @@ def handle_data(client, raw_data):
         send("accept_attack", d, to=[clients[client[0]]]) # TODO: Having to list this is silly. Gotta improve _send
 
 def send_world():
-    for e in game.entities.values():
+    for e in game.get_entities():
         to = [c for c in clients.values() if not e.controlled_by == c[2]] # Don't send updates about their own controlled stuff
         if to:
             send("update", e, to)

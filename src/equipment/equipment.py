@@ -38,7 +38,8 @@ class BowWeapon(Weapon):
         e.move_dir = euclid.Vector2(*util.rot_to_vec(e.rotation))
 
         game.spawn(e)
-        events.dispatch("on_shoot", e)
+        if game.is_controlled(e):
+            events.dispatch("on_shoot", e)
 
 
 class MeleeWeapon(Weapon):
@@ -64,7 +65,8 @@ class MeleeWeapon(Weapon):
         e.rotation_off = -self.arc/80.0
 
         game.spawn(e)
-        events.dispatch("on_shoot", e)
+        if game.is_controlled(e):
+            events.dispatch("on_shoot", e)
 
 weapons = (BowWeapon, MeleeWeapon)
 

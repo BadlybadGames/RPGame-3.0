@@ -151,10 +151,8 @@ class WorldEntity(Entity):
         self.dead = False
 
     def die(self):
-        if not self.dead:
-            from game.game import game
-            self.dead = True
-            game.despawn(self)
+        from game.game import game
+        game.despawn(self)
 
     def on_collision(self, other):
         pass

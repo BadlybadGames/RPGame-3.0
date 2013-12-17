@@ -20,18 +20,21 @@ entity_ticks = {}  # Last tick we recieved updates for entities
 
 def init_handlers():
     class ClientHandler(object):
-        def on_shoot(self, entity):
-            if game.is_controlled(entity):
+        def on_shoot(self, old_entity):
+            old_eid = old_entity.eid
+            if game.is_controlled(old_entity):
                 def reply_callback(eid):
+                    game.local_entities[old_eid] = None
                     new_entity = game.get_entity(eid)
                     if new_entity: # Might happen if a packet is lost
                         # TODO: Some trouble here (i.e if packet is lost)
                         new_entity.sprite.kill()
-                        new_entity.sprite = entity.sprite
+                        new_entity.sprite = old_entity.sprite
                     else:
-                        game.entities[eid] = entity
+                        old_entity.eid = eid
+                        game.entities[eid] = old_entity
 
-                packet_id = send("spawn_entity", entity)
+                packet_id = send("spawn_entity", old_entity)
                 packet_hooks[packet_id] = reply_callback
 
     events.handler.push_handlers(ClientHandler())
@@ -96,6 +99,7 @@ def handle_data(raw_data):
 
         e = game.get_entity(eid)
 
+        # If it has the key, this entity has already existed at a point so we should ignore this
         if not e:
             game.spawn(entity, force=True)
             #e.from_json(entity)
