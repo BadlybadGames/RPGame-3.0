@@ -154,6 +154,9 @@ class WorldEntity(Entity):
 
         self.dead = False
 
+    def on_init(self):
+        pass
+
     def die(self):
         from game.game import game
         game.despawn(self)

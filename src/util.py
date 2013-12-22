@@ -1,7 +1,11 @@
-"""Various functional functions"""
+"""Various functional functions and convenient classes"""
 
 from math import *
 
+class AttrDict(dict):
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self
 
 def points_to_rotation(p1, p2=None):
     x1, y1 = p1[0], p1[1]

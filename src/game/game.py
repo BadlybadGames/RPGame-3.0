@@ -8,6 +8,7 @@ from collections import namedtuple
 
 import entity
 import events
+import level
 
 LERP_TIME =  0.1
 LERP_MAX_VEL = 80
@@ -22,6 +23,8 @@ def start():
     #Setup the game
     layer = cocos.layer.Layer()
     game = Game()
+    lvl = level.BasicLevel()
+    game.set_level(lvl)
 
     #load game data
     entity.load_data()
@@ -66,6 +69,10 @@ class Game():
 
         #Update position then velocity
         self.tick += t
+
+        #update the level
+        self.level.on_update(t)
+
         for i in self.get_entities():
             self.update_entity(i, t)
 
@@ -107,6 +114,9 @@ class Game():
     def update_entity(self, ent, t):
         ent.update(t)
 
+    def set_level(self, lvl):
+        self.level = lvl
+
     def get_entity(self, eid):
         return self.entities.get(eid)
 
@@ -132,6 +142,11 @@ class Game():
         return self.player_id != 0
 
     def spawn(self, e, force=False):
+        """Spawn an entity to the game world
+
+        e: type of entity that should be spawned
+        force: if True will ignore regular checks that would prevent the spawning
+        """
         if not force:
             # First figure out if we should spawn
             if not e.controlled_by == self.get_player_id():
@@ -157,6 +172,8 @@ class Game():
             #    anchor.sprite.add(e.sprite)
             #else:
             self.sprite_batch.add(e.sprite)
+
+        e.on_init()
 
     def despawn(self, e):
         if e.sprite:

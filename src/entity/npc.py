@@ -8,15 +8,19 @@ import logging
 
 class npc(entity.WorldEntity):
 
-    ai = ai.BasicEnemyAi
+    ai_type = ai.BasicEnemyAi
     etype = "enemy"
     name = "npc"
 
-    def __init__(self, position):
-        super(npc, self).__init__(position)
+    def __init__(self):
+        super(npc, self).__init__()
 
-        if self.ai:
-            self.ai = self.ai(owner = self)
+    def on_init(self):
+        """Called after eid is created"""
+
+        if self.ai_type and not hasattr(self, "ai"):
+            self.ai = self.ai_type()
+            self.ai.owner = self.eid
 
     def update(self, t):
         super(npc, self).update(t)
@@ -35,4 +39,6 @@ class npc(entity.WorldEntity):
 class BasicEnemy(npc):
     image = "player.png"
 
-entity.new_entity(npc)
+    name = "basicenemy"
+
+entity.new_entity(BasicEnemy)
