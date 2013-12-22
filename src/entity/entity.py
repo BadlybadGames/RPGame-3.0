@@ -50,6 +50,10 @@ class Entity(object):
         #which player_id it is controlled by. 0 means server
         self.controlled_by = 0
 
+    def _init_sprite(self, sprite):
+        """Called by game when a sprite is initialized to allow modification of the sprite"""
+        pass
+
     @classmethod
     def from_json(cls, json):
         """Build an object from jsoned data"""

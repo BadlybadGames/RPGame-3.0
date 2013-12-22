@@ -11,6 +11,9 @@ class MeleeWeaponEntity(entity.WorldEntity):
         self.image = "sword.png"
         super(MeleeWeaponEntity, self).__init__()
 
+    def _init_sprite(self, sprite): # TODO: Sprite still isnt centered on player
+        sprite.transform_anchor = sprite.get_rect().midbottom
+
     def update(self, t):
         super(MeleeWeaponEntity, self).update(t)
 

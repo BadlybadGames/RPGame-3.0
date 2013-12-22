@@ -52,17 +52,20 @@ class MeleeWeapon(Weapon):
         self.arc = 120
         self.duration = 1.0
         self.attack_speed = 1.1
+        self.offset = 30
 
     def attack(self):
         real_wielder = self.get_wielder() # The real entity (not the eid)
         e = entity.get_entity_type("MeleeWeaponEntity")()
+        e.attached_to = self.wielder
         e.wielder = self.wielder
         e.controlled_by = real_wielder.controlled_by
         e.position = real_wielder.position.copy()
         e.duration = self.duration
         e.duration_left = e.duration
+        e.offset = self.offset
         e.arc = self.arc
-        e.rotation_off = -self.arc/80.0
+        e.rotation_off = -self.arc/2
 
         game.spawn(e)
         if game.is_controlled(e):

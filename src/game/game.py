@@ -3,6 +3,7 @@ from cocos.director import director
 from cocos import collision_model as cm
 
 import logging
+logger = logging.getLogger()
 from collections import namedtuple
 
 import entity
@@ -147,13 +148,15 @@ class Game():
                 self.entity_count += 1
             self.entities[e.eid] = e
 
-        if e.attached_to:
-            anchor = self.get_entity(e.attached_to)
-            anchor.sprite.add(e.sprite)
-        else:
-            if e.image:
-                e.sprite = cocos.sprite.Sprite(str(e.image))
-                self.sprite_batch.add(e.sprite)
+
+        if e.image:
+            e.sprite = cocos.sprite.Sprite(str(e.image))
+            e._init_sprite(e.sprite)
+            #if e.attached_to:
+            #    anchor = self.get_entity(e.attached_to)
+            #    anchor.sprite.add(e.sprite)
+            #else:
+            self.sprite_batch.add(e.sprite)
 
     def despawn(self, e):
         if e.sprite:
