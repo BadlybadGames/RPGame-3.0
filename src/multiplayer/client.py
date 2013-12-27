@@ -18,28 +18,27 @@ packet_id = 0
 packet_hooks = {}  # Function callbacks
 entity_ticks = {}  # Last tick we recieved updates for entities
 
-def init_handlers():
-    class ClientHandler(object):
-        def on_shoot(self, old_entity):
-            old_eid = old_entity.eid
-            if game.is_controlled(old_entity):
-                def reply_callback(eid):
-                    game.local_entities[old_eid] = None
-                    new_entity = game.get_entity(eid)
-                    if new_entity: # Might happen if a packet is lost
-                        # TODO: Some trouble here (i.e if packet is lost)
-                        new_entity.sprite.kill()
-                        new_entity.sprite = old_entity.sprite
-                    else:
-                        old_entity.eid = eid
-                        game.entities[eid] = old_entity
+# Init handlers
+class ClientHandler(object):
 
-                packet_id = send("spawn_entity", old_entity)
-                packet_hooks[packet_id] = reply_callback
+    def on_attack(self, attacker, weapon, old_entity):
+        old_eid = old_entity.eid
+        if game.is_controlled(old_entity):
+            def reply_callback(eid):
+                game.local_entities[old_eid] = None
+                new_entity = game.get_entity(eid)
+                if new_entity: # Might happen if a packet is lost
+                    # TODO: Some trouble here (i.e if packet is lost)
+                    new_entity.sprite.kill()
+                    new_entity.sprite = old_entity.sprite
+                else:
+                    old_entity.eid = eid
+                    game.entities[eid] = old_entity
 
-    events.handler.push_handlers(ClientHandler())
+            packet_id = send("spawn_entity", old_entity)
+            packet_hooks[packet_id] = reply_callback
 
-init_handlers()
+events.handler.push_handlers(ClientHandler())
 
 def recieve():
     """Check for data from server"""

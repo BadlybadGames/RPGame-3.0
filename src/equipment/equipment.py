@@ -8,6 +8,7 @@ class Equipment(entity.Entity):
     pass
 
 class Weapon(Equipment):
+    attack_sounds = ()
 
     def __init__(self, wielder=None):
         self.wielder = wielder and wielder.eid or None
@@ -20,6 +21,7 @@ class Weapon(Equipment):
 
 class BowWeapon(Weapon):
     name = "BasicBow"
+    attack_sounds = ("arrow.mp3", )
 
     def __init__(self, wielder=None):
         super(BowWeapon, self).__init__(wielder)
@@ -41,11 +43,12 @@ class BowWeapon(Weapon):
         game.spawn(e)
         
         if game.is_controlled(e):
-            events.dispatch("on_shoot", e)
+            events.dispatch("on_attack", self.get_wielder(), self, e)
 
 
 class MeleeWeapon(Weapon):
     name = "BasicMeleeWeapon"
+    attack_sounds = ("swish-1.mp3", )
 
     def __init__(self, wielder=None):
         super(MeleeWeapon, self).__init__(wielder)
@@ -72,7 +75,7 @@ class MeleeWeapon(Weapon):
 
 
         if game.is_controlled(e):
-            events.dispatch("on_shoot", e)
+            events.dispatch("on_attack", self.get_wielder(), self, e)
 
 weapons = (BowWeapon, MeleeWeapon)
 

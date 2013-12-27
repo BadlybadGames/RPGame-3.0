@@ -1,12 +1,20 @@
 import cocos
 from cocos.director import director
+import pyglet
 
 import logging
 import logging.config
 import sys
+import os
 import json
 
 import interface.menus
+import audio
+
+pyglet.resource.path = [".", "../res/sfx", "../res/sprites", "../res/music"]
+pyglet.resource.reindex()
+
+audio.play_song("maintheme.mp3")
 
 def init_logging():
     with open("logging.json", 'rt') as f:

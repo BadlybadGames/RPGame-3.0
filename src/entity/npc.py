@@ -32,7 +32,6 @@ class npc(entity.WorldEntity):
         self.cshape = cm.CircleShape(center=self.position, r=self.size)
 
     def on_collision(self, other):
-        logging.info("I was hit! by: ", other.etype)
         if other.etype == "projectile":
             self.die()
 

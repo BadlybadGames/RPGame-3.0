@@ -28,6 +28,7 @@ class BasicEnemyAi(Ai):
         owner = self._get_owner()
         if not owner:
             return
+            
         owner.move_dir = (self.state.destination - owner.position).normalized()
         
         dv = self.state.destination - owner.position

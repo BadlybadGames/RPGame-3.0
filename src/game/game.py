@@ -1,6 +1,7 @@
 import cocos
 from cocos.director import director
 from cocos import collision_model as cm
+import pyglet
 
 import logging
 logger = logging.getLogger()
@@ -9,6 +10,7 @@ from collections import namedtuple
 import entity
 import events
 import level
+import audio
 
 LERP_TIME =  0.1
 LERP_MAX_VEL = 80
@@ -25,6 +27,7 @@ def start():
     game = Game()
     lvl = level.BasicLevel()
     game.set_level(lvl)
+    audio.play_music()
 
     #load game data
     entity.load_data()
@@ -165,7 +168,8 @@ class Game():
 
 
         if e.image:
-            e.sprite = cocos.sprite.Sprite(str(e.image))
+            img = pyglet.resource.image(e.image)
+            e.sprite = cocos.sprite.Sprite(img)
             e._init_sprite(e.sprite)
             #if e.attached_to:
             #    anchor = self.get_entity(e.attached_to)
