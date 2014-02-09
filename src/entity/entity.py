@@ -149,6 +149,9 @@ class WorldEntity(Entity):
         self.aim = (30, 30)  # Our desired point of target
         self.size = 32
 
+        self.max_hp = 100
+        self.hp = self.max_hp
+
         self.attacking = False
         self.attack_cooldown = 0.0
 

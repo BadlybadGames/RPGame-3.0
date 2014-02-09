@@ -12,6 +12,8 @@ import events
 import level
 import audio
 
+import interface.gui
+
 LERP_TIME =  0.1
 LERP_MAX_VEL = 80
 
@@ -44,6 +46,9 @@ def start():
     layer.schedule(game.update)
     layer.schedule(game.update_render)
 
+    #Load the gui
+    gui = interface.gui.Gui()
+    layer.add(gui)
     return layer
 
 

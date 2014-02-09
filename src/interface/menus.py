@@ -31,6 +31,15 @@ class MainMenu(cocos.menu.Menu):
         scene = cocos.scene.Scene()
 
         scene.add(game.game.start())
+
+        g = game.game.game
+
+        player = entity.get_entity_type("player")()
+        player.position.x, player.position.y = (200, 200)
+
+        g.spawn(player)
+        g.set_player(player.eid)
+
         director.push(scene)
 
     def on_host(self):
