@@ -8,6 +8,7 @@ class MeleeWeaponEntity(entity.WorldEntity):
     etype = "Projectile"
 
     def __init__(self, **kwargs):
+        self.controlled_by = None  # set after initialization
         self.image = "sword.png"
         super(MeleeWeaponEntity, self).__init__()
 

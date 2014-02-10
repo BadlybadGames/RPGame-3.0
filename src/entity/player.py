@@ -9,6 +9,7 @@ import entity
 class Player(entity.WorldEntity):
 
     name = "player"
+    etype = "player"
 
     def __init__(self):
         self.entity_name = "player"

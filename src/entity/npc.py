@@ -32,8 +32,7 @@ class npc(entity.WorldEntity):
         self.cshape = cm.CircleShape(center=self.position, r=self.size)
 
     def on_collision(self, other):
-        if other.etype == "projectile":
-            self.die()
+        pass
 
 class BasicEnemy(npc):
     image = "player.png"

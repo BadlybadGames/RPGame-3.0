@@ -42,7 +42,7 @@ class Entity(object):
     Abstract entities are simply abstract data that need to be able to be serialized
     """
 
-    etype = "Entity"
+    etype = "entity"
 
     def __init__(self):
         self.is_player = False
@@ -130,6 +130,7 @@ class Entity(object):
                 d[k] = v
         return d
 
+
 class WorldEntity(Entity):
     """A physical entity that usually has a physical appearance"""
 
@@ -166,3 +167,15 @@ class WorldEntity(Entity):
 
     def on_collision(self, other):
         pass
+
+    def take_damage(self, damage):
+        """Deal damage to this entity
+
+        @param damage: damage to be dealt
+        @return: final damage taken
+        """
+        self.hp -= damage
+        if self.hp <= 0:
+            self.die()
+
+        return damage

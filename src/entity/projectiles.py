@@ -21,4 +21,21 @@ class Projectile(entity.WorldEntity):
     def update_collision(self):
         self.cshape = cm.CircleShape(center=self.position, r=self.size)
 
+    def on_collision(self, other):
+        from game.game import game
+
+        success = False
+        owner = game.get_entity(self.controlled_by)
+
+        if owner.etype == "player":
+            if other.etype == "enemy":
+                success = True
+        elif owner.etype == "enemy":
+            if other.etype == "player":
+                success = True
+
+        if success:
+            other.take_damage(self.damage)
+            self.die()
+
 entity.new_entity(Projectile)
