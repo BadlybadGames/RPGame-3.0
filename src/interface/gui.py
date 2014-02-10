@@ -70,6 +70,35 @@ class Bar(cocos.cocosnode.CocosNode):
         self._update()
 
 
+class MessageLog(cocos.layer.Layer):
+
+    FADE_TIME = 5.0 # Seconds before a newly pushed message fades out
+    ENTRY_FONT_SIZE = 14
+
+    def __init__(self):
+        super(MessageLog, self).__init__()
+
+        self.log = []  # Logs are stored as [message, time_until_fade]
+
+    def add_message(self, message):
+        """Add a message to the message log and display it
+
+        @param message: Message to be pushed to the message log
+
+        TODO: Coloured strings
+        TODO: Fadeout
+        """
+
+        entry = cocos.text.Label(text=message, font_size=self.ENTRY_FONT_SIZE)
+
+        for e in self.log:
+            x, y = e[0].position
+            e[0].position = (x, y+self.ENTRY_FONT_SIZE+6)
+
+        self.log.append((entry, 5.0))
+        self.add(entry)
+
+
 class Gui(cocos.layer.Layer):
     def __init__(self):
         super(Gui, self).__init__()
@@ -80,8 +109,12 @@ class Gui(cocos.layer.Layer):
         self.hp_bar = Bar(50, 50, 200, 30, color=red)
         self.mana_bar = Bar(50, 90, 200, 30, color=blue)
 
+        self.log = MessageLog()
+        self.log.position = (50, 160)
+
         self.add(self.hp_bar)
         self.add(self.mana_bar)
+        self.add(self.log)
 
         self.schedule(self.update)
 

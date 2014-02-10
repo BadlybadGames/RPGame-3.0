@@ -39,6 +39,8 @@ def on_new_client(addr):
     #Create a new player for them
     client_id = len(clients)+1
 
+    game.gui.log.add_message("Player connected from {ip}".format(ip=addr[0]))
+
     e = entity.player.Player()
     e.local = False
 

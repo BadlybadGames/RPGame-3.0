@@ -47,8 +47,9 @@ def start():
     layer.schedule(game.update_render)
 
     #Load the gui
-    gui = interface.gui.Gui()
-    layer.add(gui)
+    game.gui = interface.gui.Gui()  # TODO: would be better to have this is instance in the interface package
+    layer.add(game.gui)
+    game.gui.log.add_message("Welcome to RPGame.")
     return layer
 
 
