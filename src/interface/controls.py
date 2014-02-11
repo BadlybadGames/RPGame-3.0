@@ -2,7 +2,7 @@ import cocos
 import pyglet
 from pyglet import input
 
-from game.game import game
+import game
 
 control = None
 
@@ -60,7 +60,7 @@ class PlayerController(Controller):
                 self.state["movement"][1] -= 1
 
         if updated:
-            player = game.get_player()
+            player = game.Game.get_player()
             if player:
                 player.update_input(self.state)
             return True
@@ -86,7 +86,7 @@ class PlayerController(Controller):
                 self.state["movement"][1] += 1
 
         if updated:
-            player = game.get_player()
+            player = game.Game.get_player()
             if player:
                 player.update_input(self.state)
             return True
@@ -96,7 +96,7 @@ class PlayerController(Controller):
     def on_mouse_motion(self, x, y, dx, dy):
         self.state["updated"] = True
 
-        player = game.get_player()
+        player = game.Game.get_player()
         if not player:
             return
 
@@ -172,7 +172,7 @@ class GamepadController(Controller):
             self.state["aim"] = x, y
 
         if updated:
-            player = game.get_player()
+            player = game.Game.get_player()
             if player:
                 player.update_input(self.state)
 
@@ -185,7 +185,7 @@ class GamepadController(Controller):
         if button == 5:
             self.state["attacking"] = True
 
-        player = game.get_player()
+        player = game.Game.get_player()
         if player:
             player.update_input(self.state)
 
@@ -194,6 +194,6 @@ class GamepadController(Controller):
         if button == 5:
             self.state["attacking"] = False
 
-        player = game.get_player()
+        player = game.Game.get_player()
         if player:
             player.update_input(self.state)

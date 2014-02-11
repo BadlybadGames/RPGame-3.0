@@ -1,5 +1,5 @@
 import entity
-from game.game import game
+import game
 
 
 class MeleeWeaponEntity(entity.WorldEntity):
@@ -18,7 +18,7 @@ class MeleeWeaponEntity(entity.WorldEntity):
     def update(self, t):
         super(MeleeWeaponEntity, self).update(t)
 
-        wielder = game.get_entity(self.wielder)
+        wielder = game.Game.get_entity(self.wielder)
 
         self.position = wielder.position.copy()
 

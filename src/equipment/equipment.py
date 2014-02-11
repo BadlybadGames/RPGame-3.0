@@ -1,9 +1,8 @@
 from cocos import euclid
 import util
-from game.game import game
 import entity
 import events
-
+import game
 class Equipment(entity.Entity):
     pass
 
@@ -16,7 +15,7 @@ class Weapon(Equipment):
         self.attack_speed = 0.20
 
     def get_wielder(self):
-        return game.get_entity(self.wielder)
+        return game.Game.get_entity(self.wielder)
 
 
 class BowWeapon(Weapon):
@@ -41,9 +40,9 @@ class BowWeapon(Weapon):
         e.duration = self.proj_life
         e.rotation = wielder.rotation
         e.move_dir = euclid.Vector2(*util.rot_to_vec(e.rotation))
-        game.spawn(e)
+        game.Game.spawn(e)
         
-        if game.is_controlled(e):
+        if game.Game.is_controlled(e):
             events.dispatch("on_attack", self.get_wielder(), self, e)
 
 
@@ -72,10 +71,10 @@ class MeleeWeapon(Weapon):
         e.offset = self.offset
         e.arc = self.arc
         e.rotation_off = -self.arc/2
-        game.spawn(e)
+        game.Game.spawn(e)
 
 
-        if game.is_controlled(e):
+        if game.Game.is_controlled(e):
             events.dispatch("on_attack", self.get_wielder(), self, e)
 
 weapons = (BowWeapon, MeleeWeapon)

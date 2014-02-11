@@ -5,7 +5,7 @@ import logging
 
 import entity.entity
 from multiplayer import *
-from game.game import game  # Yeeeaaah.... Time to figure out python packages!
+import game
 
 logger = logging.getLogger("server")
 
@@ -39,12 +39,12 @@ def on_new_client(addr):
     #Create a new player for them
     client_id = len(clients)+1
 
-    game.gui.log.add_message("Player connected from {ip}".format(ip=addr[0]))
+    game.Game.gui.log.add_message("Player connected from {ip}".format(ip=addr[0]))
 
     e = entity.player.Player()
     e.local = False
 
-    game.spawn(e)
+    game.Game.spawn(e)
     e.controlled_by = client_id
 
     bow = entity.get_entity_type("BasicBow")(e)
@@ -56,7 +56,7 @@ def on_new_client(addr):
     send("set_control", {"eid": e.eid}, to=to)
     send("set_player", {"player":client_id}, to=to)
     send("update", e)
-    send("set_tick", {"tick":game.tick}, to=to)
+    send("set_tick", {"tick":game.Game.tick}, to=to)
 
 def _send(addr, data):
     """send(addr, data) -> packet size
@@ -88,7 +88,7 @@ def send(command, data, to=None):
     data = {
         "command": command,
         "data": data,
-        "tick": game.tick
+        "tick": game.Game.tick
     }
 
     msg = json.dumps(data, cls=jsonEncoder)
@@ -109,7 +109,7 @@ def handle_data(client, raw_data):
         #Time to update an entity
         d = data["data"]
         eid = d["eid"]
-        entity = game.get_entity(eid)
+        entity = game.Game.get_entity(eid)
 
     elif data["command"] == "update_controls":  # The client wants to update the state of his controls
         d = data["data"]
@@ -117,11 +117,11 @@ def handle_data(client, raw_data):
         state = d["state"]
         position = d["position"]
 
-        e = game.get_entity(client[1])
+        e = game.Game.get_entity(client[1])
         if position:
             e.position = position
         e.update_input(state)
-        tick = max(0, game.tick - tick) / 100.0
+        tick = max(0, game.Game.tick - tick) / 100.0
         #print "tick: ", tick
         e.update_movement(tick)
 
@@ -130,7 +130,7 @@ def handle_data(client, raw_data):
         if hasattr(entity, "eid"):
             logger.warning("Client sent a spawn_entity with an entity with eid")
             delattr(entity, "eid")
-        game.spawn(entity, force=True)
+        game.Game.spawn(entity, force=True)
         d = {
             "packet_reference": data["packet_id"],
             "eid":entity.eid
@@ -138,7 +138,7 @@ def handle_data(client, raw_data):
         send("accept_attack", d, to=[clients[client[0]]]) # TODO: Having to list this is silly. Gotta improve _send
 
 def send_world():
-    for e in game.get_entities():
+    for e in game.Game.get_entities():
         to = [c for c in clients.values() if not e.controlled_by == c[2]] # Don't send updates about their own controlled stuff
         if to:
             send("update", e, to)

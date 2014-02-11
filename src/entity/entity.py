@@ -2,6 +2,7 @@ import logging
 
 import cocos
 from cocos import euclid
+import game
 
 logger = logging.getLogger("entity")
 
@@ -162,8 +163,7 @@ class WorldEntity(Entity):
         pass
 
     def die(self):
-        from game.game import game
-        game.despawn(self)
+        game.Game.despawn(self)
 
     def on_collision(self, other):
         pass

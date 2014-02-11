@@ -8,6 +8,8 @@ import logging
 logger = logging.getLogger()
 
 from util import AttrDict
+import game
+
 
 class Ai(object):
 
@@ -22,20 +24,17 @@ class Ai(object):
         if not self.owner:
             return None
 
-        from game.game import game
-        return game.get_entity(self.owner)
+        return game.Game.get_entity(self.owner)
 
 class BasicEnemyAi(Ai):
     name = "BasicEnemyAi"
 
     def update_ai(self):
-        from game.game import game
-
         owner = self._get_owner()
         if not owner:
             return
 
-        target = game.get_player()
+        target = game.Game.get_player()
 
         if not target:
             return

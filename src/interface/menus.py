@@ -26,52 +26,38 @@ class MainMenu(cocos.menu.Menu):
         pyglet.app.exit()
 
     def on_start(self):
-        import game.game
+        import game
 
-        scene = cocos.scene.Scene()
-
-        scene.add(game.game.start())
-
-        g = game.game.game
+        game.start()
 
         player = entity.get_entity_type("player")()
         player.position.x, player.position.y = (200, 200)
 
-        g.spawn(player)
-        g.set_player(player.eid)
-
-        director.push(scene)
+        game.Game.spawn(player)
+        game.Game.set_player(player.eid)
 
     def on_host(self):
         import multiplayer
-        import game.game
+        import game
 
-        scene = cocos.scene.Scene()
+        game.start()
 
-        scene.add(game.game.start())
-        scene.add(multiplayer.host())
-
-        g = game.game.game
+        game.Scene.add(multiplayer.host())
 
         player = entity.get_entity_type("player")()
         player.position.x, player.position.y = (200, 200)
 
-        g.spawn(player)
-        g.set_player(player.eid)
+        game.Game.spawn(player)
+        game.Game.set_player(player.eid)
 
         sword = entity.get_entity_type("BasicMeleeWeapon")(player)
         player.weapon = sword
 
-        director.push(scene)
-
     def on_join(self):
         import multiplayer
-        import game.game
+        import game
 
-        scene = cocos.scene.Scene()
+        game.start()
 
-        scene.add(game.game.start())
-        scene.add(multiplayer.join())
-
-        director.push(scene)
+        game.Scene.add(multiplayer.join())
 

@@ -1,5 +1,6 @@
 import entity
 from cocos import collision_model as cm
+import game
 
 
 class Projectile(entity.WorldEntity):
@@ -22,10 +23,9 @@ class Projectile(entity.WorldEntity):
         self.cshape = cm.CircleShape(center=self.position, r=self.size)
 
     def on_collision(self, other):
-        from game.game import game
 
         success = False
-        owner = game.get_entity(self.controlled_by)
+        owner = game.Game.get_entity(self.controlled_by)
 
         if owner.etype == "player":
             if other.etype == "enemy":

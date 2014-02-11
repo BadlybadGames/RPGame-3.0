@@ -1,6 +1,7 @@
 import cocos
 from pyglet import graphics
 from pyglet.gl import *
+import game
 
 class Bar(cocos.cocosnode.CocosNode):
     def __init__(self, x, y, w, h, color=(255,)*3*4, factor=1.0):
@@ -119,8 +120,7 @@ class Gui(cocos.layer.Layer):
         self.schedule(self.update)
 
     def update(self, dt):
-        from game.game import game
-        player = game.get_player()
+        player = game.Game.get_player()
 
         if not player:
             return
