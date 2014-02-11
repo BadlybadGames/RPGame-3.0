@@ -59,9 +59,20 @@ class Theta_star(object):
         if s1.g < g_old:
             if s1.g < g_old:
                 if s1 in open_list:
+                    open.remove(s1)
+                open.insert(s1, s1.g + s1.h)
 
-
-
+    @classmethod
+    def compute_cost(cls, s, s1):
+        if cls.line_of_sight(s.parent, s1):
+            # Path 2
+            s1.parent = s.parent
+            s1.g = s.g + c(s, s1) # c? c=compute_cost?
+        else:
+            # Path 1
+            if s.g + c(c, s1) < s1.g:
+                s1.parent = s
+                s1.g = s.g + c(s, s1)
 
 class Node(object):
     def __init__(self):
