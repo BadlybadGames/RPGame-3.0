@@ -1,4 +1,5 @@
 import cocos
+import math
 from pyglet import graphics
 from pyglet.gl import *
 import game
@@ -107,14 +108,17 @@ class Gui(cocos.layer.Layer):
         #Gradiented colours
         red = (255, 0, 0, 255, 0, 0, 255, 130, 130, 255, 130, 130)
         blue = (0, 0, 255, 0, 0, 255, 130, 130, 255, 130, 130, 255)
+        green = (0, 255, 0, 0, 255, 0, 130, 255, 130, 130, 255, 130)
         self.hp_bar = Bar(50, 50, 200, 30, color=red)
-        self.mana_bar = Bar(50, 90, 200, 30, color=blue)
+        self.mana_bar = Bar(50, 50+40*1, 200, 30, color=blue)
+        self.xp_bar = Bar(50, 50+40*2, 200, 30, color=green)
 
         self.log = MessageLog()
         self.log.position = (50, 160)
 
         self.add(self.hp_bar)
         self.add(self.mana_bar)
+        self.add(self.xp_bar)
         self.add(self.log)
 
         self.schedule(self.update)
@@ -125,4 +129,8 @@ class Gui(cocos.layer.Layer):
         if not player:
             return
 
-        self.hp_bar.set_factor(float(player.hp) / player.max_hp)
+        f = min(max(float(player.hp) / player.max_hp, 0), 1.0)
+        self.hp_bar.set_factor(f)
+
+        f = min(max(float(player.xp) / player.xp_needed, 0), 1.0)
+        self.xp_bar.set_factor(f)

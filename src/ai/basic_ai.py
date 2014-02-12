@@ -39,6 +39,7 @@ class BasicEnemyAi(Ai):
         if not target:
             return
 
+        # Check if we can attack, and if so, do it
         destination = MoveBasic.get_next(target)
         v = Vector2(*destination) - Vector2(*owner.position)
         v.normalize()

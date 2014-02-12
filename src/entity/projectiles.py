@@ -26,6 +26,11 @@ class Projectile(entity.WorldEntity):
 
         success = False
         owner = game.Game.get_entity(self.controlled_by)
+        print self.controlled_by
+        print owner
+
+        if not owner:
+            return
 
         if owner.etype == "player":
             if other.etype == "enemy":

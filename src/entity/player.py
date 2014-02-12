@@ -12,6 +12,7 @@ class Player(entity.WorldEntity):
     etype = "player"
 
     def __init__(self):
+        self._xp = 0
         self.entity_name = "player"
         self.image = "player.png"
 
@@ -59,5 +60,25 @@ class Player(entity.WorldEntity):
 
         if self.move_dir.magnitude() > 1:
             self.move_dir.normalize()  # We only want the direction (at least when using a keyboard)
+
+    @property
+    def xp(self):
+        return self._xp
+
+
+    @xp.setter
+    def xp(self, value):
+        self._xp = value
+        if self._xp > self.xp_needed:
+            self.level_up()
+
+    @property
+    def xp_needed(self):
+        return int(20 + self.level+1 ** 1.5 * 5)
+
+    def level_up(self):
+        self.xp -= self.xp_needed
+        self.level += 1
+
 
 entity.new_entity(Player)

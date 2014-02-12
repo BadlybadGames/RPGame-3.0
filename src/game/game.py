@@ -112,7 +112,6 @@ class Game():
         for a, b in self.collision.iter_all_collisions():
             a = a.entity
             b = b.entity
-            logging.info("Collision between %i and %i", a.eid, b.eid)
             #check if the types of the two should result in collision
             if any((a.etype == "projectile" and b.etype == "projectile",)):
                 continue
@@ -131,6 +130,12 @@ class Game():
 
     def get_player(self):
         return self.get_entity(self.controlled_player)
+
+    def get_players(self):
+        """ Returns entities that are considered players
+
+        """
+        return (i for i in self.entities if i.is_player)
 
     def get_entities(self):
         return (e for e in self.entities.values() + self.local_entities.values() if e)

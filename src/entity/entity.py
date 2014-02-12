@@ -102,7 +102,7 @@ class Entity(object):
             if k.startswith("_"):  # Ignore builtins
                 continue
 
-            if k in ("sprite",):
+            if k in ("sprite", "xp_needed"):
                 continue
 
             v = getattr(new, k)
@@ -119,7 +119,7 @@ class Entity(object):
             if k.startswith("_"):  # Ignore builtins
                 continue
 
-            if k in ("sprite",):
+            if k in ("sprite","xp_needed"):  # TODO: Possibly try to find a cleaner way
                 continue
 
             v = getattr(self, k)
@@ -154,6 +154,9 @@ class WorldEntity(Entity):
         self.max_hp = 100
         self.hp = self.max_hp
 
+        self.xp_worth = 0
+        self.level = 1
+
         self.attacking = False
         self.attack_cooldown = 0.0
 
@@ -163,7 +166,14 @@ class WorldEntity(Entity):
         pass
 
     def die(self):
+        self.on_die()
         game.Game.despawn(self)
+
+    def on_die(self):
+        """ Called when we die, should be safe to overload. usually
+
+        """
+        pass
 
     def on_collision(self, other):
         pass

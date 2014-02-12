@@ -36,6 +36,9 @@ class MainMenu(cocos.menu.Menu):
         game.Game.spawn(player)
         game.Game.set_player(player.eid)
 
+        bow = entity.get_entity_type("BasicBow")(player)
+        player.weapon = bow
+
     def on_host(self):
         import multiplayer
         import game
@@ -50,8 +53,8 @@ class MainMenu(cocos.menu.Menu):
         game.Game.spawn(player)
         game.Game.set_player(player.eid)
 
-        sword = entity.get_entity_type("BasicMeleeWeapon")(player)
-        player.weapon = sword
+        bow = entity.get_entity_type("BasicBow")(player)
+        player.weapon = bow
 
     def on_join(self):
         import multiplayer

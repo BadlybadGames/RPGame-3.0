@@ -35,7 +35,7 @@ class BowWeapon(Weapon):
         e = entity.get_entity_type("Projectile")()
 
         e.damage = 20
-        e.controlled_by = wielder.controlled_by
+        e.controlled_by = self.wielder
         e.position = wielder.position.copy()
         e.duration = self.proj_life
         e.rotation = wielder.rotation
