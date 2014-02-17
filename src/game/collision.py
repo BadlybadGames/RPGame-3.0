@@ -6,57 +6,6 @@ from cocos.euclid import Vector2
 import numpy as np
 import collections
 
-
-### TODO: Remove this, just for reference
-class AStar(object):
-    def __init__(self, graph):
-        self.graph = graph
-
-    def heuristic(self, node, start, end):
-        raise NotImplementedError
-
-    def search(self, start, end):
-        openset = set()
-        closedset = set()
-        current = start
-        openset.add(current)
-        while openset:
-            current = min(openset, key=lambda o:o.g + o.h)
-            if current == end:
-                path = []
-                while current.parent:
-                    path.append(current)
-                    current = current.parent
-                path.append(current)
-                return path[::-1]
-            openset.remove(current)
-            closedset.add(current)
-            for node in self.graph[current]:
-                if node in closedset:
-                    continue
-                if node in openset:
-                    new_g = current.g + current.move_cost(node)
-                    if node.g > new_g:
-                        node.g = new_g
-                        node.parent = current
-                else:
-                    node.g = current.g + current.move_cost(node)
-                    node.h = self.heuristic(node, start, end)
-                    node.parent = current
-                    openset.add(node)
-        return None
-
-class AStarNode(object):
-    def __init__(self):
-        self.g = 0
-        self.h = 0
-        self.parent = None
-
-    def move_cost(self, other):
-        raise NotImplementedError
-
-####end reference
-
 class Node(object):
     def __init__(self, x, y):
         self.g = 0
@@ -71,16 +20,19 @@ class ThetaStar(object):
     TODO: This should be a functional class
     """
 
-    def __init__(self, graph):
+    def __init__(self, graph, grid):
         self.graph = graph
+        self.grid = grid
 
     def search(self, start, end):
-        open_set = set()
-        closed_set = set()
+        self.open_set = []
+        closed_set = []
         current = start
-        open_set.add(current)
-        while open_set:
-            current = min(open_set, key=lambda o: o.g + o.h)
+        current.g = 0
+        current.parent = current
+        self.open_set.append(current)
+        while self.open_set:
+            current = min(self.open_set, key=lambda o: o.g + o.h)
             if current == end:
                 path = []
                 while current.parent:
@@ -88,25 +40,19 @@ class ThetaStar(object):
                     current = current.parent
                 path.append(current)
                 return path[::-1]
-            open_set.remove(current)
-            closed_set.add(current)
+            self.open_set.remove(current)
+            closed_set.append(current)
             for node in self.graph[current]:
                 if node in closed_set:
                     continue
-                if node in open_set:
-                    new_g = current.g + self.c(current, node)
-                    if node.g > new_g:
-                        node.g = new_g
-                        node.parent = current
-                else:
-                    node.g = current.g + self.c(current, node)
-                    node.parent = current
-                    open_set.add(node)
+                if node not in self.open_set:
+                    node.g = 99999
+                    node.parent = None
+                self.update_vertex(current, node)
         return None
 
 
-    @classmethod
-    def line_of_sight(cls, s, s1):
+    def line_of_sight(self, s, s1):
         x0 = s.x
         y0 = s.y
         x1 = s1.x
@@ -123,60 +69,57 @@ class ThetaStar(object):
             dx *= -1
             s.x = -1
         else:
-            s.y = 1
+            s.x = 1
         if dx >= dy:
             while x0 != x1:
                 f = f + dy
                 if f >= dx:
-                    if cls.map[x0+((s.x - 1)/2), y0 + ((s.y - 1/2))]:
+                    if self.grid[x0+((s.x - 1)/2)][y0 + ((s.y - 1)/2)]:
                         return False
                     y0 = y0 + s.y
                     f = f - dx
-                if f != 0 and cls.map[x0 + ((s.x - 1)/2), y0 + ((s.y - 1)/2)]:
+                if f != 0 and self.grid[x0 + ((s.x - 1)/2)][y0 + ((s.y - 1)/2)]:
                     return False
-                if dy == 0 and cls.map[x0+((s.x - 1)/2),y0] and cls.map[x0 + ((s.x - 1)/2), y0 - 1]:
+                if dy == 0 and self.grid[x0+((s.x - 1)/2)][y0] and self.grid[x0 + ((s.x - 1)/2)][y0 - 1]:
                     return False
                 x0 = x0 + s.x
         else:
             while y0 != y1:
                 f = f + dx
                 if f >= dy:
-                    if cls.map[x0 + ((s.x - 1)/2), y0+((s.y - 1)/2)]:
+                    if self.grid[x0 + ((s.x - 1)/2)][y0+((s.y - 1)/2)]:
                         return False
                     x0 = x0+s.x
                     f = f - dy
-                if f != 0 and cls.map[x0 + ((s.x - 1)/2), y0 + ((s.y - 1)/2)]:
+                if f != 0 and self.grid[x0 + ((s.x - 1)/2)][y0 + ((s.y - 1)/2)]:
                     return False
-                if dx == 0 and cls.map[x0, y0 + ((s.y -1)/2)] and cls.map[x0 - 1, y0+((s.y-1)/2)]:
+                if dx == 0 and self.grid[x0][y0 + ((s.y -1)/2)] and self.grid[x0 - 1][y0+((s.y-1)/2)]:
                     return False
                 y0 = y0 + s.y
         return True
 
-    @classmethod
-    def update_vertex(cls, s, s1):
+    def update_vertex(self, s, s1):
         g_old = s1.g
-        cls.compute_cost(s, s1)
+        self.compute_cost(s, s1)
         if s1.g < g_old:
-            if s1 in cls.open_list:
-                if s1 in cls.open_list:
-                    cls.open_list.remove(s1)
-                cls.open_list.insert(s1, s1.g + s1.h)
+            if s1 in self.open_set:
+                if s1 in self.open_set:
+                    self.open_set.remove(s1)
+                self.open_set.insert(s1, s1.g + s1.h)
 
-    @classmethod
-    def compute_cost(cls, s, s1):
-        if cls.line_of_sight(s.parent, s1):
+    def compute_cost(self, s, s1):
+        if self.line_of_sight(s.parent, s1):
             # Path 2
-            if s.parent.g + cls.c(s.parent, s1) < s1.g:
+            if s.parent.g + self.c(s.parent, s1) < s1.g:
                 s1.parent = s.parent
-                s1.g = s.parent.g + cls.c(s.parent, s1)
+                s1.g = s.parent.g + self.c(s.parent, s1)
         else:
             # Path 1
-            if s.g + cls.c(s, s1) < s1.g:
+            if s.g + self.c(s, s1) < s1.g:
                 s1.parent = s
-                s1.g = s.g + cls.c(s, s1)
+                s1.g = s.g + self.c(s, s1)
 
-    @classmethod
-    def c(cls, s, s1):
+    def c(self, s, s1):  # Should s1 always be the goal node?
         """returns the length of straight line from vertex s to s1"""
         return (Vector2(s.x, s.y) - Vector2(s1.x, s1.y)).magnitude() * 32  # this might be incorrect
 
@@ -223,7 +166,7 @@ class Pathfinding(object):
             return path
 
         graph, nodes = make_graph(self.width, self.height)
-        t = ThetaStar(graph)
+        t = ThetaStar(graph, self.grid)
         start, end = nodes[v1[0]][v1[1]], nodes[v2[0]][v2[1]]
         path = t.search(start, end)
         return path
