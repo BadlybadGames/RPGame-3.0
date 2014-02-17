@@ -35,7 +35,7 @@ class ThetaStar(object):
             current = min(self.open_set, key=lambda o: o.g + o.h)
             if current == end:
                 path = []
-                while current.parent:
+                while current != start:
                     path.append(current)
                     current = current.parent
                 path.append(current)
@@ -103,9 +103,8 @@ class ThetaStar(object):
         self.compute_cost(s, s1)
         if s1.g < g_old:
             if s1 in self.open_set:
-                if s1 in self.open_set:
                     self.open_set.remove(s1)
-                self.open_set.insert(s1, s1.g + s1.h)
+            self.open_set.append(s1)
 
     def compute_cost(self, s, s1):
         if self.line_of_sight(s.parent, s1):
