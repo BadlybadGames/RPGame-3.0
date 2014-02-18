@@ -13,6 +13,9 @@ class Node(object):
         self.parent = None
         self.x, self.y = x, y
 
+    def __repr__(self):
+        return "Node({x}, {y})".format(x=self.x, y=self.y)
+
 class ThetaStar(object):
     """Implemtents theta*: http://aigamedev.com/open/tutorials/theta-star-any-angle-paths/
 
@@ -32,7 +35,7 @@ class ThetaStar(object):
         current.parent = current
         self.open_set.append(current)
         while self.open_set:
-            current = min(self.open_set, key=lambda o: o.g + o.h)
+            current = min(self.open_set, key=lambda o: o.g + self.c(o, end))  # c is used for calculating the heuristics
             if current == end:
                 path = []
                 while current != start:
@@ -62,40 +65,40 @@ class ThetaStar(object):
         f = 0
         if dy < 0:
             dy *= -1
-            s.y = -1
+            sy = -1
         else:
-            s.y = 1
+            sy = 1
         if dx < 0:
             dx *= -1
-            s.x = -1
+            sx = -1
         else:
-            s.x = 1
+            sx = 1
         if dx >= dy:
             while x0 != x1:
                 f = f + dy
                 if f >= dx:
-                    if self.grid[x0+((s.x - 1)/2)][y0 + ((s.y - 1)/2)]:
+                    if self.grid[x0+((sx - 1)/2)][y0 + ((sy - 1)/2)]:
                         return False
-                    y0 = y0 + s.y
+                    y0 = y0 + sy
                     f = f - dx
-                if f != 0 and self.grid[x0 + ((s.x - 1)/2)][y0 + ((s.y - 1)/2)]:
+                if f != 0 and self.grid[x0 + ((sx - 1)/2)][y0 + ((sy - 1)/2)]:
                     return False
-                if dy == 0 and self.grid[x0+((s.x - 1)/2)][y0] and self.grid[x0 + ((s.x - 1)/2)][y0 - 1]:
+                if dy == 0 and self.grid[x0+((sx - 1)/2)][y0] and self.grid[x0 + ((sx - 1)/2)][y0 - 1]:
                     return False
-                x0 = x0 + s.x
+                x0 = x0 + sx
         else:
             while y0 != y1:
                 f = f + dx
                 if f >= dy:
-                    if self.grid[x0 + ((s.x - 1)/2)][y0+((s.y - 1)/2)]:
+                    if self.grid[x0 + ((sx - 1)/2)][y0+((sy - 1)/2)]:
                         return False
-                    x0 = x0+s.x
+                    x0 = x0+sx
                     f = f - dy
-                if f != 0 and self.grid[x0 + ((s.x - 1)/2)][y0 + ((s.y - 1)/2)]:
+                if f != 0 and self.grid[x0 + ((sx - 1)/2)][y0 + ((sy - 1)/2)]:
                     return False
-                if dx == 0 and self.grid[x0][y0 + ((s.y -1)/2)] and self.grid[x0 - 1][y0+((s.y-1)/2)]:
+                if dx == 0 and self.grid[x0][y0 + ((sy -1)/2)] and self.grid[x0 - 1][y0+((sy-1)/2)]:
                     return False
-                y0 = y0 + s.y
+                y0 = y0 + sy
         return True
 
     def update_vertex(self, s, s1):
@@ -103,7 +106,7 @@ class ThetaStar(object):
         self.compute_cost(s, s1)
         if s1.g < g_old:
             if s1 in self.open_set:
-                    self.open_set.remove(s1)
+                self.open_set.remove(s1)
             self.open_set.append(s1)
 
     def compute_cost(self, s, s1):
