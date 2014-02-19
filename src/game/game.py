@@ -11,6 +11,7 @@ import entity
 import events
 import level
 import audio
+import tilemap
 
 import interface.gui
 
@@ -37,6 +38,12 @@ def start():
     batch = cocos.batch.BatchNode()
     game.sprite_batch = batch
     layer.add(batch)
+
+    background, collision = tilemap.init()
+    scroller = cocos.layer.ScrollingManager()
+    scroller.add(background)
+    scroller.add(collision)
+    layer.add(scroller, z=-1)
 
     #Setup controls
     import interface.controls  # TODO: Add init functions for modules so late import isnt needed

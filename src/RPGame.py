@@ -11,7 +11,7 @@ import json
 import interface.menus
 import audio
 
-pyglet.resource.path = [".", "../res/sfx", "../res/sprites", "../res/music"]
+pyglet.resource.path = [".", "../data/maps", "../res/sfx", "../res/sprites", "../res/music"]
 pyglet.resource.reindex()
 
 audio.play_song("maintheme.mp3")
