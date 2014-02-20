@@ -3,12 +3,12 @@
  <tileset firstgid="1" name="ground_tiles" tilewidth="32" tileheight="32">
   <image source="../res/tilesets/ground_tiles.png" width="672" height="701"/>
  </tileset>
- <layer name="background" width="30" height="30" opacity="0.61">
+ <layer name="background" width="30" height="30">
   <data encoding="base64" compression="zlib">
    eJxtl8mu1DAQRe1vhA2DgB2gJAwCdoCcMAjYAUqHYQ+sAL0vpCJ8lGO/XpTitss13ipXLymlOaiItqApaAhaK50qLXW/1PVc6ST+TTIm3edsrGvuIq/UNTpm8Y7SB/9Jdk6ywXLwh3tb5ys2w7dJDrLRg598S11PdT1W4vcqfmTP1S7uF9m+yu9Ftkx1vdT12O2RI8dilZ5JZxf58BXfnD9sH6SH81HU53mQvE0xNR/2khvLQ7fX5LtojZ2sHY+SWnxip+MN5sDhvr4WMbkedCPoZv6/b8yM0otv7CGPO+QMnrHG3Figlh7E/sOgR0GPc+tHUczJxy6HOGAfmBnEP0s/vPzev69CzuugN0Fv85HDk2T0/mMP8QUXYG1L52Pg+H0JXV+DvgV9l1709H6B7ZIO7NgO9kbpXvWlJvbfv0Pfn6C/+ZBj7IGlJbX+O962Y9Ke7UGu8WkfB8knr47l0t1dpc99hJgSn3P3iC+90/3Pfftcr3CPK+lyD8YW/HEN2F73CmoZOYtkIN9vBt8rkbOr6lvwXuQDm+Z3n3ScV+2fUluXi8739d04uxd0Px8+Gi+9P463+4trAjvcn4aO93noexH0Mrd+uJ+Cy0Fnt4L/dtCdfNlOMO3+6r6yfz/GvU9Bn/NRO9Sk80288OdJ8D8Nepbb98Tvvt9D277L+BH3fgb9ym2NuO6IaZGcd8H/PuhDPnxwzRM7+jYxQY7fWXRN+g1GT+K3LWC7fzd7rJd09IpB/MajewBYsF3g3T0IuSW1tekZaExtzzHGPVsMkkfM/Oa7F4Jl5IIJYoYtJbX9hZy65pG7E2+bfeU96nvvOdvhJR7GqXsg9pDvfk7lrO+7njFnyQcHfU15XsYu8GWM4w+53CTHWHHt9v3SM9YeR/vlmZUewn1j232014Evrg/Pc0W24INnB8ffM6vnlbnbv8iH7Ytkw+O5wrMLNnpudj0Z256hwSS+2O9+/sXHktqaG6UPbPouNTJIJ3qK5KKzf0f9Pvq/DRiYO9nGWZF/JbX4dF//B2rdxbk=
   </data>
  </layer>
- <layer name="collision" width="30" height="30" opacity="0.91">
+ <layer name="collision" width="30" height="30">
   <data encoding="base64" compression="zlib">
    eJztzbENAAAIw7Ae1/9v4gtgcKTMbpIevR2Xy+VyuVwul8vlfnUvHv7YHtE=
   </data>

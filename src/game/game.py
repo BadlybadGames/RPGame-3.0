@@ -43,6 +43,7 @@ def start():
     scroller = cocos.layer.ScrollingManager()
     scroller.add(background)
     scroller.add(collision)
+    layer.scroller = scroller
     layer.add(scroller, z=-1)
 
     #Setup controls
@@ -103,6 +104,10 @@ class Game():
         self.run_collision()
 
     def update_render(self, t):
+        player = game.get_player()
+        if player:  # Update scrolling layer
+            layer.scroller.set_focus(*player.position, force=True)
+
         for e in self.get_entities():
             if e.sprite:
                 #Interpolation
