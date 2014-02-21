@@ -11,22 +11,41 @@ import entity
 import events
 import level
 import audio
+import tilemap
 
 import interface.gui
 
 LERP_TIME =  0.1
 LERP_MAX_VEL = 80
 
+# TODO: Get rid of these global variables. Possibly use director.scene or director functions instead?
 game = None
 layer = None
+scroller = None
 
 def start():
     global game
     global layer
+    global scroller
 
     #Setup the game
+    #The scene structure is like this:
+    #Scene
+    #  ScrollingManager
+    #    ScrollingLayer
+    #      Batch
+    #    TileMap
+    #  Layer
+    #    Controls
+    #    Gui
+
+    scroller = cocos.layer.ScrollingManager()
+    scrolling_layer = cocos.layer.ScrollableLayer()
     layer = cocos.layer.Layer()
     game = Game()
+
+    scroller.add(scrolling_layer)
+
     lvl = level.BasicLevel()
     game.set_level(lvl)
     audio.play_music()
@@ -36,21 +55,26 @@ def start():
 
     batch = cocos.batch.BatchNode()
     game.sprite_batch = batch
-    layer.add(batch)
+    scrolling_layer.add(batch)
+
+    background, collision = tilemap.init()
+    scroller.add(background)
+    scroller.add(collision)
+    scroller.add(scrolling_layer)
 
     #Setup controls
     import interface.controls  # TODO: Add init functions for modules so late import isnt needed
     c = interface.controls.init()
     layer.add(c)
 
-    layer.schedule(game.update)
-    layer.schedule(game.update_render)
+    scrolling_layer.schedule(game.update)
+    scrolling_layer.schedule(game.update_render)
 
     #Load the gui
     game.gui = interface.gui.Gui()  # TODO: would be better to have this is instance in the interface package
     layer.add(game.gui)
     game.gui.log.add_message("Welcome to RPGame.")
-    return game, layer
+    return game, layer, scroller
 
 
 class Game():
@@ -96,6 +120,10 @@ class Game():
         self.run_collision()
 
     def update_render(self, t):
+        player = game.get_player()
+        if player:  # Update scrolling layer
+            scroller.set_focus(*player.position, force=True)
+
         for e in self.get_entities():
             if e.sprite:
                 #Interpolation

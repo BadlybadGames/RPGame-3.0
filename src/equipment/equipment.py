@@ -10,7 +10,7 @@ class Weapon(Equipment):
     attack_sounds = ()
 
     def __init__(self, wielder=None):
-        self.wielder = wielder and wielder.eid or None
+        self.wielder = wielder.eid
         self.damage = (1, 6)
         self.attack_speed = 0.20
 

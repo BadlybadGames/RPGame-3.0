@@ -17,7 +17,8 @@ def start():
     global Game, Layer, Scene
 
     Scene = cocos.scene.Scene()
-    Game, Layer = game.start()
-    Scene.add(Layer)
+    Game, layer, scroller = game.start()
+    Scene.add(scroller, z=1)
+    Scene.add(layer, z=2)
 
     director.push(Scene)
