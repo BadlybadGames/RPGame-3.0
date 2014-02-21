@@ -12,6 +12,7 @@ class Bar(cocos.cocosnode.CocosNode):
         @param y:
         @param w:
         @param h:
+        @param color: (R,G,B) * 4, color parameters for each vertex
         @param factor: how filled the bar is, 0.0 is 0% filled, 1.0 is 100% filled
         """
         super(Bar, self).__init__()
@@ -35,16 +36,31 @@ class Bar(cocos.cocosnode.CocosNode):
         w = self.w * self.factor
         h = self.h
 
-        _pos = (self.x, self.y,
+        OUTLINE_THICKNESS = 2
+
+        _pos = (x, y,
                      x+w, y,
                      x+w, y+h,
                      x, y+h)
+
+        th = OUTLINE_THICKNESS
+        _outline_pos = (x - th, y - th,
+                     x+w + th, y - th,
+                     x+w + th, y+h + th,
+                     x - th, y+h + th)
+
+
+        self.outline_vlist = graphics.vertex_list(4,
+                                                  ("v2f", _outline_pos),
+                                                  ("c3B", (0,)*3*4))
 
         self.vertex_list = graphics.vertex_list(4,
                                                 ("v2f", _pos),
                                                 ("c3B", self.color))
 
     def draw(self):
+        if self.outline_vlist and self.factor != 0.0:
+            self.outline_vlist.draw(GL_QUADS)
         if self.vertex_list:
             self.vertex_list.draw(GL_QUADS)
 
