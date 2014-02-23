@@ -90,13 +90,15 @@ class Bar(cocos.cocosnode.CocosNode):
 
 class MessageLog(cocos.layer.Layer):
 
-    FADE_TIME = 5.0 # Seconds before a newly pushed message fades out
+    ENTRY_FADE_DELAY = 5.0  # Seconds before a newly pushed message fades out
+    ENTRY_FADE_DURATION = 2.0
     ENTRY_FONT_SIZE = 14
 
     def __init__(self):
         super(MessageLog, self).__init__()
 
         self.log = []  # Logs are stored as [message, time_until_fade]
+        self.schedule(self.update)
 
     def add_message(self, message):
         """Add a message to the message log and display it
@@ -113,8 +115,18 @@ class MessageLog(cocos.layer.Layer):
             x, y = e[0].position
             e[0].position = (x, y+self.ENTRY_FONT_SIZE+6)
 
-        self.log.append((entry, 5.0))
+        self.log.append((entry,  self.ENTRY_FADE_DELAY))
         self.add(entry)
+
+    def update(self, t):
+        new_log = []
+        for text, time in self.log:
+            new_time = time-t
+            new_log.append((text, new_time))
+            if new_time <= 0.0:
+                f = max(0, min(new_time * 1.0 / -self.ENTRY_FADE_DURATION, 1.0))
+                text.opacity = 255 * -f
+        self.log = new_log
 
 
 class Gui(cocos.layer.Layer):
