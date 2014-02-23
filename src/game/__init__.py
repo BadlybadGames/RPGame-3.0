@@ -2,7 +2,7 @@
 import cocos
 from cocos.director import director
 
-import game
+import _game
 
 Game = None
 Layer = None  # This might not need to be public, Scene could possibly be used instead (or director)
@@ -17,7 +17,7 @@ def start():
     global Game, Layer, Scene
 
     Scene = cocos.scene.Scene()
-    Game, layer, scroller = game.start()
+    Game, layer, scroller = _game.start()
     Scene.add(scroller, z=1)
     Scene.add(layer, z=2)
 

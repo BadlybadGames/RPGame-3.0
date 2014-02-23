@@ -23,10 +23,10 @@ game = None
 layer = None
 scroller = None
 
+
 def start():
-    global game
-    global layer
     global scroller
+    global game
 
     #Setup the game
     #The scene structure is like this:
