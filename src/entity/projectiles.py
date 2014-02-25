@@ -15,8 +15,6 @@ class Projectile(entity.WorldEntity):
     def update(self, t):
         super(Projectile, self).update(t)
 
-        print "Here I aaaaaaam"
-
         self.duration -= t
         if self.duration <= 0:
             self.die()

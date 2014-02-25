@@ -23,6 +23,5 @@ class BasicLevel(Level):
         if random.random() < self.spawn_t * t:
             self.spawn_t = 0
             e = entity.get_entity_type("basicenemy")()
-            print game
             game.Game.spawn(e)
 

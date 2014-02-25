@@ -1,9 +1,19 @@
+from cocos import collision_model as cm
+from cocos.euclid import Vector2
+
 import entity
 import game
+import util
 
 
 class MeleeWeaponEntity(entity.WorldEntity):
+    """
+    Important parameters:
 
+    Offset: length from center of player to center of collision detection
+    Arc: Swing arc
+    Size: Size used for collision detection
+    """
     name = "MeleeWeaponEntity"
     etype = "Projectile"
 
@@ -29,5 +39,9 @@ class MeleeWeaponEntity(entity.WorldEntity):
         self.duration_left -= t
         if self.duration_left <= 0:
             self.die()
+
+    def update_collision(self):
+        center = self.position + Vector2(util.rot_to_vec(self.rotation)) * self.offset
+        self.cshape = cm.CircleShape(center=center, r=self.size)
 
 entity.new_entity(MeleeWeaponEntity)

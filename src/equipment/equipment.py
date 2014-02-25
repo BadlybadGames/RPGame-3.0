@@ -10,7 +10,7 @@ class Weapon(Equipment):
     attack_sounds = ()
 
     def __init__(self, wielder=None):
-        self.wielder = wielder.eid
+        self.wielder = wielder and wielder.eid or None
         self.damage = (1, 6)
         self.attack_speed = 0.20
 
@@ -58,6 +58,7 @@ class MeleeWeapon(Weapon):
         self.duration = 1.0
         self.attack_speed = 1.1
         self.offset = 30
+        self.size = 20
 
     def attack(self):
         real_wielder = self.get_wielder() # The real entity (not the eid)
@@ -70,6 +71,7 @@ class MeleeWeapon(Weapon):
         e.duration_left = e.duration
         e.offset = self.offset
         e.arc = self.arc
+        e.size = self.size
         e.rotation_off = -self.arc/2
         game.Game.spawn(e)
 

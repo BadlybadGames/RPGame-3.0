@@ -160,10 +160,10 @@ class Game():
         return self.get_entity(self.controlled_player)
 
     def get_players(self):
-        """ Returns entities that are considered players
+        """ Returns entities (not eids) that are considered players
 
         """
-        return (i for i in self.entities if i.is_player)
+        return (self.get_entity(i) for i in self.entities if i and self.get_entity(i).is_player)
 
     def get_entities(self):
         return (e for e in self.entities.values() + self.local_entities.values() if e)
