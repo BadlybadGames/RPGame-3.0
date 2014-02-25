@@ -34,5 +34,8 @@ nosetests.xml
 .project
 .pydevproject
 
-* Game logs
+# Game logs
 *.log
+
+# Ignore configs
+*.conf
