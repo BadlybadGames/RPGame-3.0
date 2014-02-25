@@ -6,6 +6,7 @@ from cocos.euclid import Vector2
 import numpy as np
 import collections
 
+
 class Node(object):
     def __init__(self, x, y):
         self.g = 0
@@ -45,7 +46,7 @@ class ThetaStar(object):
                 return path[::-1]
             self.open_set.remove(current)
             closed_set.append(current)
-            for node in self.graph[current]:
+            for node in [n for n in self.graph[current] if self.line_of_sight(current, n)]:
                 if node in closed_set:
                     continue
                 if node not in self.open_set:
@@ -114,12 +115,12 @@ class ThetaStar(object):
             # Path 2
             if s.parent.g + self.c(s.parent, s1) < s1.g:
                 s1.parent = s.parent
-                s1.g = s.parent.g + self.c(s.parent, s1)
+                s1.g = s.parent.g
         else:
             # Path 1
             if s.g + self.c(s, s1) < s1.g:
                 s1.parent = s
-                s1.g = s.g + self.c(s, s1)
+                s1.g = s.g
 
     def c(self, s, s1):  # Should s1 always be the goal node?
         """returns the length of straight line from vertex s to s1"""
@@ -198,3 +199,4 @@ class CollisionGrid(object):
         import cocos
 
         layer = cocos.layer.Layer()
+
