@@ -1,202 +1,53 @@
-# -*- coding: utf-8 -*-
-from itertools import product
-import cocos
-from cocos.euclid import Vector2
+__author__ = 'Sebsebeleb'
 
 import numpy as np
-import collections
+
+import _pathfinding
+
+pathf = None
+tw = 0
+th = 0
 
 
-class Node(object):
-    def __init__(self, x, y):
-        self.g = 0
-        self.h = 0
-        self.parent = None
-        self.x, self.y = x, y
+def init_collision(collision_layer):
+    """Initalizes the collision map used for pathfinding with the layer passed
 
-    def __repr__(self):
-        return "Node({x}, {y})".format(x=self.x, y=self.y)
+    @param collision_layer: RectMapLayer loaded from a tiled map to be used as collision
+    """
+    global pathf, tw, th
 
-class ThetaStar(object):
-    """Implemtents theta*: http://aigamedev.com/open/tutorials/theta-star-any-angle-paths/
+    tw = collision_layer.tw
+    th = collision_layer.th
 
-    TODO: Use lazy theta* instead: http://aigamedev.com/open/tutorial/lazy-theta-star/
-    TODO: This should be a functional class
+    w, h = len(collision_layer.cells), len(collision_layer.cells[0])
+    pathf = _pathfinding.Pathfinding(w, h)
+    for x, _xcell in enumerate(collision_layer.cells):
+        for y, cell in enumerate(_xcell):
+            if cell.tile:
+                pathf.grid[x, y] = True
+            else:
+                pathf.grid[x, y] = False
+
+
+def get_path(start, goal):
     """
 
-    def __init__(self, graph, grid):
-        self.graph = graph
-        self.grid = grid
+    @param start: Start position in world position
+    @param goal: Goal position in world position
+    @return: List of path waypoints in world positions
+    """
 
-    def search(self, start, end):
-        self.open_set = []
-        closed_set = []
-        current = start
-        current.g = 0
-        current.parent = current
-        self.open_set.append(current)
-        while self.open_set:
-            current = min(self.open_set, key=lambda o: o.g + self.c(o, end))  # c is used for calculating the heuristics
-            if current == end:
-                path = []
-                while current != start:
-                    path.append(current)
-                    current = current.parent
-                path.append(current)
-                return path[::-1]
-            self.open_set.remove(current)
-            closed_set.append(current)
-            for node in [n for n in self.graph[current] if self.line_of_sight(current, n)]:
-                if node in closed_set:
-                    continue
-                if node not in self.open_set:
-                    node.g = 99999
-                    node.parent = None
-                self.update_vertex(current, node)
+    # Converts from world position to closest vertex in the grid
+    x1 = int(max(0, min(round(start[0] / tw), pathf.width-1)))
+    y1 = int(max(0, min(round(start[1] / th), pathf.height-1)))
+    x2 = int(max(0, min(round(goal[0] / tw), pathf.width-1)))
+    y2 = int(max(0, min(round(goal[1] / th), pathf.height-1)))
+
+
+    path = pathf.get_path((x1, y1), (x2, y2))
+    if not path:
         return None
 
+    array = (np.array([(n.x, n.y) for n in path]) * (tw, th))[1:]
 
-    def line_of_sight(self, s, s1):
-        x0 = s.x
-        y0 = s.y
-        x1 = s1.x
-        y1 = s1.y
-        dy = y1 - y0
-        dx = x1 - x0
-        f = 0
-        if dy < 0:
-            dy *= -1
-            sy = -1
-        else:
-            sy = 1
-        if dx < 0:
-            dx *= -1
-            sx = -1
-        else:
-            sx = 1
-        if dx >= dy:
-            while x0 != x1:
-                f = f + dy
-                if f >= dx:
-                    if self.grid[x0+((sx - 1)/2)][y0 + ((sy - 1)/2)]:
-                        return False
-                    y0 = y0 + sy
-                    f = f - dx
-                if f != 0 and self.grid[x0 + ((sx - 1)/2)][y0 + ((sy - 1)/2)]:
-                    return False
-                if dy == 0 and self.grid[x0+((sx - 1)/2)][y0] and self.grid[x0 + ((sx - 1)/2)][y0 - 1]:
-                    return False
-                x0 = x0 + sx
-        else:
-            while y0 != y1:
-                f = f + dx
-                if f >= dy:
-                    if self.grid[x0 + ((sx - 1)/2)][y0+((sy - 1)/2)]:
-                        return False
-                    x0 = x0+sx
-                    f = f - dy
-                if f != 0 and self.grid[x0 + ((sx - 1)/2)][y0 + ((sy - 1)/2)]:
-                    return False
-                if dx == 0 and self.grid[x0][y0 + ((sy -1)/2)] and self.grid[x0 - 1][y0+((sy-1)/2)]:
-                    return False
-                y0 = y0 + sy
-        return True
-
-    def update_vertex(self, s, s1):
-        g_old = s1.g
-        self.compute_cost(s, s1)
-        if s1.g < g_old:
-            if s1 in self.open_set:
-                self.open_set.remove(s1)
-            self.open_set.append(s1)
-
-    def compute_cost(self, s, s1):
-        if self.line_of_sight(s.parent, s1):
-            # Path 2
-            if s.parent.g + self.c(s.parent, s1) < s1.g:
-                s1.parent = s.parent
-                s1.g = s.parent.g
-        else:
-            # Path 1
-            if s.g + self.c(s, s1) < s1.g:
-                s1.parent = s
-                s1.g = s.g
-
-    def c(self, s, s1):  # Should s1 always be the goal node?
-        """returns the length of straight line from vertex s to s1"""
-        return (Vector2(s.x, s.y) - Vector2(s1.x, s1.y)).magnitude() * 32  # this might be incorrect
-
-def make_graph(w, h):
-    w, h = w + 1, h + 1  # We are making a vertex graph out of a grid map
-    nodes = [[Node(x, y) for y in range(h)] for x in range(w)]
-    graph = {}
-    for x, y in product(range(w), range(h)):
-        node = nodes[x][y]
-        graph[node] = []
-        for i, j in product([-1, 0, 1], [-1, 0, 1]):
-            if not (0 <= x + i < w):
-                continue
-            if not (0 <= y + j < h):
-                continue
-            graph[nodes[x][y]].append(nodes[x+i][y+j])
-    return graph, nodes
-
-
-class Pathfinding(object):
-
-    _cache = {}
-
-    def __init__(self, map, width, height):
-        self.map = map
-        self.grid = np.zeros((width, height))
-        self.width = width
-        self.height = height
-
-    def get_path(self, v1, v2):
-        """Returns the path needed to take on the collision grid map from v1 to v2.
-
-        get_path(v1, v2) should be inverse of get_path(v2, v1)
-
-        @param v1: From position
-        @param v2: To position
-
-        @return: array of positions to traverse
-        """
-
-        # The very first thing we do is check if the path is cached
-        if self._cache.has_key((v1, v2)) or self._cache.has_key((v2, v1)):
-            path = self._cache.get((v1, v2)) or reversed(self._cache.get((v2, v1)))
-            return path
-
-        graph, nodes = make_graph(self.width, self.height)
-        t = ThetaStar(graph, self.grid)
-        start, end = nodes[v1[0]][v1[1]], nodes[v2[0]][v2[1]]
-        path = t.search(start, end)
-        return path
-
-    def clear(self):
-        """ Should be called when the map is updated. Clears cache
-
-
-        """
-        self._cache = {}
-
-class CollisionGrid(object):
-
-    def __init__(self, tile_width=48, tile_height=48, width=20, height=20):
-        """Grid representation of the collision map
-
-        @param tile_width: Width of one tile in pixels
-        @param tile_height: Height of one tile in pixels
-        @param width: Number of tiles in the width
-        @param height: Number of tiles in the height
-        """
-        self.grid = np.zeros((width, height))
-        mp = cocos.tiles.load_tmx("test.tmx")
-
-
-    def show(self):
-        import cocos
-
-        layer = cocos.layer.Layer()
-
+    return array.tolist()

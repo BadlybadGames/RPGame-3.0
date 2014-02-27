@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" width="30" height="30" tilewidth="32" tileheight="32">
  <tileset firstgid="1" name="ground_tiles" tilewidth="32" tileheight="32">
-  <image source="../res/tilesets/ground_tiles.png" width="672" height="701"/>
+  <image source="../res/tilesets/ground_tiles.png" width="672" height="704"/>
  </tileset>
  <layer name="background" width="30" height="30">
   <data encoding="base64" compression="zlib">
@@ -10,7 +10,7 @@
  </layer>
  <layer name="collision" width="30" height="30">
   <data encoding="base64" compression="zlib">
-   eJztzbENAAAIw7Ae1/9v4gtgcKTMbpIevR2Xy+VyuVwul8vlfnUvHv7YHtE=
+   eJztlUsOwCAIRDmc9z9T95MKDgw0bUriwg/zEBWXma2HWrcho5u729vXuKg7yY3iyHA9v92cghvpR+PVPLP+DDeT007u6Tkymp4Ws5aNuWJ3bwhZU/UK+1P/QhTPz+3RUHEzPoq3rdxvtlYouF137s332dNWcNnzVnLZtdX/iK3lKm6GfaI1bZiPyXYBsFk0VQ==
   </data>
  </layer>
 </map>

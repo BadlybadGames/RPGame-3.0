@@ -4,6 +4,8 @@ from cocos import collision_model as cm
 import pyglet
 
 import logging
+from game import collision
+
 logger = logging.getLogger()
 from collections import namedtuple
 
@@ -57,10 +59,20 @@ def start():
     game.sprite_batch = batch
     scrolling_layer.add(batch)
 
-    background, collision = tilemap.init()
-    scroller.add(background)
-    scroller.add(collision)
+    #load the map
+    background, collision_map = tilemap.init()
+    scroller.add(background, z=0)
+    scroller.add(collision_map, z=1)
     scroller.add(scrolling_layer)
+
+    #initalize the pathfinding map
+    collision.init_collision(collision_map)
+
+    #add an enemy for testing purposes
+    enemy = entity.get_entity_type("basicenemy")()
+    enemy.position = (100, 100)
+    enemy.movement_speed = 0.35
+    game.spawn(enemy)
 
     #Setup controls
     import interface.controls  # TODO: Add init functions for modules so late import isnt needed
@@ -104,7 +116,7 @@ class Game():
         self.tick += t
 
         #update the level
-        self.level.on_update(t)
+        #self.level.on_update(t)
 
         for i in self.get_entities():
             self.update_entity(i, t)

@@ -40,7 +40,9 @@ class BasicEnemyAi(Ai):
             return
 
         # Check if we can attack, and if so, do it
-        destination = MoveBasic.get_next(target)
+        destination = MoveBasic.get_next(owner, target)
+        if not destination:
+            destination = target.position  # No path? Let's bruteforce our way!
         v = Vector2(*destination) - Vector2(*owner.position)
         v.normalize()
 

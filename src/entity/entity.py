@@ -68,7 +68,7 @@ class Entity(object):
         input from clients"""
         self.mov_acc = self.move_dir * self.acc_speed
 
-        self.position += self.mov_vel * t + (self.mov_acc * t / 2)
+        self.position += (self.mov_vel * t + (self.mov_acc * t / 2)) * self.movement_speed
         self.mov_vel += self.mov_acc * t
 
         #perform friction. Improve pls!
@@ -146,6 +146,7 @@ class WorldEntity(Entity):
         self.mov_vel = euclid.Vector2(0.0, 0.0)
         self.mov_acc = euclid.Vector2(0.0, 0.0)
         self.move_dir = euclid.Vector2(0.0, 0.0)
+        self.movement_speed = 1.0
         self.acc_speed = 200
         self.turn_speed = 400  # Degrees/second
         self.aim = (30, 30)  # Our desired point of target

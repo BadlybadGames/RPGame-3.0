@@ -11,11 +11,11 @@ class Level(object):
         pass
 
 class BasicLevel(Level):
-    spawn_freq = 0.1
+    spawn_freq = 0.03
 
     def __init__(self):
         super(BasicLevel, self).__init__()
-        self.spawn_t = 0.0
+        self.spawn_t = 1.0
 
     def on_update(self, t):
         self.spawn_t += self.spawn_freq * t
@@ -23,5 +23,7 @@ class BasicLevel(Level):
         if random.random() < self.spawn_t * t:
             self.spawn_t = 0
             e = entity.get_entity_type("basicenemy")()
+            e.position.x = 70
+            e.position.y = 70
             game.Game.spawn(e)
 
