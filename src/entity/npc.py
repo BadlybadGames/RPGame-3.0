@@ -35,7 +35,7 @@ class npc(entity.WorldEntity):
             self.ai.update_ai()
 
     def update_collision(self):
-        self.cshape = cm.CircleShape(center=self.position, r=self.size)
+        return cm.CircleShape(center=self.position, r=self.size)
 
     def on_collision(self, other):
         pass

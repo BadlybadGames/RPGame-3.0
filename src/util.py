@@ -1,6 +1,8 @@
 """Various functional functions and convenient classes"""
 
 from math import *
+from cocos.euclid import Vector2
+
 
 class AttrDict(dict):
     def __init__(self, *args, **kwargs):
@@ -52,4 +54,4 @@ def rot_to_vec(r):
 
     y = cos(r)
     x = sin(r)
-    return (x, y)
+    return Vector2(x, y)

@@ -59,10 +59,12 @@ class MeleeWeapon(Weapon):
         self.attack_speed = 1.1
         self.offset = 30
         self.size = 20
+        self.damage = 20
 
     def attack(self):
         real_wielder = self.get_wielder() # The real entity (not the eid)
         e = entity.get_entity_type("MeleeWeaponEntity")()
+        e.damage = self.damage
         e.attached_to = self.wielder
         e.wielder = self.wielder
         e.controlled_by = real_wielder.controlled_by

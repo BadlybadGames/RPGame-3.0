@@ -165,14 +165,16 @@ class Pathfinding(object):
         """
 
         # The very first thing we do is check if the path is cached
-        #if self._cache.has_key((v1, v2)):
-        #    return self._cache.get((v1, v2))
-        #elif self._cache.has_key((v2, v1)):
-        #    return self._cache.get((v2, v1))
+        if self._cache.has_key((v1, v2)):
+            return self._cache.get((v1, v2))
+        elif self._cache.has_key((v2, v1)):
+            return self._cache.get((v2, v1))
 
         t = ThetaStar(self.graph, self.grid)
         start, end = self.nodes[v1[0]][v1[1]], self.nodes[v2[0]][v2[1]]
         path = t.search(start, end)
+
+        self._cache[(v1, v2)] = path
         return path
 
     def clear(self):

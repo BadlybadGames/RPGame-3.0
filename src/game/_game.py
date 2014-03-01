@@ -116,7 +116,7 @@ class Game():
         self.tick += t
 
         #update the level
-        #self.level.on_update(t)
+        self.level.on_update(t)
 
         for i in self.get_entities():
             self.update_entity(i, t)
@@ -125,7 +125,7 @@ class Game():
         for e in self.get_entities():
             # The collision detection requires objects with .cshape attributes, so we do this.
             obj = namedtuple('Shape', ("cshape", "entity"))
-            obj.cshape = cm.CircleShape(center=e.position, r=e.size)
+            obj.cshape = e.update_collision()
             obj.entity = e
             self.collision.add(obj)
 

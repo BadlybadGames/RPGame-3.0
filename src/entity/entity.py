@@ -33,7 +33,6 @@ def load_data():
     import player
     import npc
     import projectiles
-    import weapon
     import equipment
 
 class Entity(object):

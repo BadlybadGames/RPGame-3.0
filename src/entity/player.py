@@ -61,6 +61,9 @@ class Player(entity.WorldEntity):
         if self.move_dir.magnitude() > 1:
             self.move_dir.normalize()  # We only want the direction (at least when using a keyboard)
 
+    def update_collision(self):
+        return cm.CircleShape(center=self.position, r=self.size)
+
     @property
     def xp(self):
         return self._xp
