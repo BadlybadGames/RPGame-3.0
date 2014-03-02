@@ -7,6 +7,7 @@ import _game
 Game = None
 Layer = None  # This might not need to be public, Scene could possibly be used instead (or director)
 Scene = None
+scroller = None  # TODO: There should be a different interface for this important layer
 
 
 def start():
@@ -14,7 +15,7 @@ def start():
 
 
     """
-    global Game, Layer, Scene
+    global Game, Layer, Scene, scroller
 
     Scene = cocos.scene.Scene()
     Game, layer, scroller = _game.start()

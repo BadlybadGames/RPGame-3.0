@@ -101,7 +101,7 @@ class PlayerController(Controller):
             return
 
         px, py = player.position
-        fx, fy = x - px, y - py
+        fx, fy = game.scroller.s_layer.point_to_local((x - px, y - py))  # TODO: game.scroller; nasty
 
         self.state["aim"][0] = fx
         self.state["aim"][1] = fy
@@ -111,13 +111,16 @@ class PlayerController(Controller):
         return True
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+        self.state["updated"] = True
         self.on_mouse_motion(x, y, dx, dy)
 
     def on_mouse_press(self, x, y, buttons, modifiers):
+        self.state["updated"] = True
         self.state["attacking"] = True
         #print "[CONTROLS] Mouse key pressed: ", a, b, c,
 
     def on_mouse_release(self, x, y, buttons,  modifiers):
+        self.state["updated"] = True
         self.state["attacking"] = False
 
     def on_joyaxis_motion(self, axis, value):

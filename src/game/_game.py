@@ -17,7 +17,7 @@ import tilemap
 
 import interface.gui
 
-LERP_TIME =  0.1
+LERP_TIME = 0.1
 LERP_MAX_VEL = 80
 
 # TODO: Get rid of these global variables. Possibly use director.scene or director functions instead?
@@ -43,6 +43,7 @@ def start():
 
     scroller = cocos.layer.ScrollingManager()
     scrolling_layer = cocos.layer.ScrollableLayer()
+    scroller.s_layer = scrolling_layer  # TODO: Ugh it reeks of nastiness
     layer = cocos.layer.Layer()
     game = Game()
 
@@ -116,7 +117,7 @@ class Game():
         self.tick += t
 
         #update the level
-        self.level.on_update(t)
+        #self.level.on_update(t)
 
         for i in self.get_entities():
             self.update_entity(i, t)

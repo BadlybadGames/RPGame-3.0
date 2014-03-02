@@ -67,7 +67,7 @@ class MeleeWeaponEntity(Projectile):
         sprite.transform_anchor = sprite.get_rect().midbottom
 
     def update(self, t):
-        super(MeleeWeaponEntity, self).update(t)
+        #super(MeleeWeaponEntity, self).update(t)
 
         wielder = game.Game.get_entity(self.wielder)
 
