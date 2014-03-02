@@ -2,12 +2,39 @@ __author__ = 'Sebsebeleb'
 
 import numpy as np
 
+import cocos.tiles
+
 import _pathfinding
 
 pathf = None
 tw = 0
 th = 0
 
+
+class MapCollider(cocos.tiles.RectMapCollider):
+    """Makes sure entities confirm to the map.
+
+    Is equivalent to cocos2d's RectMapCollider except it does not check for tile properties (the map should be
+    the collision layer => all tiles are obstacles)
+    """
+    def do_collision(self, cell, last, new, dy, dx):
+        if last.bottom >= cell.top > new.bottom:
+            dy = last.y - new.y
+            new.bottom = cell.top
+            if dy: self.collide_bottom(dy)
+        if last.right <= cell.left < new.right:
+            dx = last.x - new.x
+            new.right = cell.left
+            if dx: self.collide_right(dx)
+        if last.left >= cell.right > new.left:
+            dx = last.x - new.x
+            new.left = cell.right
+            if dx: self.collide_left(dx)
+        if last.top <= cell.bottom < new.top:
+            dy = last.y - new.y
+            new.top = cell.bottom
+            if dy: self.collide_top(dy)
+        return dx, dy
 
 def init_collision(collision_layer):
     """Initalizes the collision map used for pathfinding with the layer passed

@@ -5,3 +5,15 @@
 Server-client architecture
 
 Clients/se
+
+
+### Collision ###
+
+There are 3 different collision systems controlling entities:
+
+1) A collision manager manages collisions between world entities (projectiles, enemies, the player) and their targetting
+(Player's projectile hits enemy, but not other projectiles or the player)
+
+2) Tile collision makes sure characters don't walk through solid obstacles
+
+3) Pathfinding that can be invoked by AI and others

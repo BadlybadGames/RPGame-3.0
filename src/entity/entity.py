@@ -65,6 +65,7 @@ class Entity(object):
     def update_movement(self, t):
         """This is called by update and explicitly by the server when updating 
         input from clients"""
+        self.old_pos = self.position.copy()
         self.mov_acc = self.move_dir * self.acc_speed
 
         self.position += (self.mov_vel * t + (self.mov_acc * t / 2)) * self.movement_speed

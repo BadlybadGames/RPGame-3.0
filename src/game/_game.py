@@ -1,6 +1,8 @@
 import cocos
 from cocos.director import director
 from cocos import collision_model as cm
+from cocos.euclid import Vector2
+from cocos.rect import Rect
 import pyglet
 
 import logging
@@ -29,6 +31,7 @@ scroller = None
 def start():
     global scroller
     global game
+    global collision_map
 
     #Setup the game
     #The scene structure is like this:
@@ -71,7 +74,7 @@ def start():
 
     #add an enemy for testing purposes
     enemy = entity.get_entity_type("basicenemy")()
-    enemy.position = (100, 100)
+    enemy.position = Vector2(100, 100)
     enemy.movement_speed = 0.35
     game.spawn(enemy)
 
@@ -109,6 +112,7 @@ class Game():
         w, h = director.get_window_size()
         cell_size = 64*1.25  # The size used for grids for the collision manager
         self.collision = cm.CollisionManagerGrid(0, w, 0, h, cell_size, cell_size)
+        self.tile_collider = collision.MapCollider()
 
     def update(self, t):
         self.collision.clear()
@@ -150,6 +154,17 @@ class Game():
                 e.sprite.rotation = (e.sprite.rotation + e.rotation) / 2
 
     def run_collision(self):
+        # First we check the tile map collision
+        for e in self.get_entities():
+            last = Rect(e.old_pos.x, e.old_pos.y, width=e.size, height=e.size)
+            new = Rect(e.position.x, e.position.y, width=e.size, height=e.size)
+            dx, dy = e.position - e.old_pos
+
+            self.tile_collider.collide_map(collision_map, last, new, dx, dy)
+
+            e.position = Vector2(*new.bottomleft)
+
+        # Then entity collision
         for a, b in self.collision.iter_all_collisions():
             a = a.entity
             b = b.entity

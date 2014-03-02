@@ -47,6 +47,7 @@ class Projectile(entity.WorldEntity):
         other.take_damage(self.damage)
         self.die()
 
+
 class MeleeWeaponEntity(Projectile):
     """
     Important parameters:
