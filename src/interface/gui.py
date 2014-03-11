@@ -4,6 +4,7 @@ from pyglet import graphics
 from pyglet.gl import *
 import game
 
+
 class Bar(cocos.cocosnode.CocosNode):
     def __init__(self, x, y, w, h, color=(255,)*3*4, factor=1.0):
         """

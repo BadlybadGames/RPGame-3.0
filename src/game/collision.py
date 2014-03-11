@@ -78,3 +78,7 @@ def get_path(start, goal):
     array = (np.array([(n.x, n.y) for n in path]) * (tw, th))[1:]
 
     return array.tolist()
+
+def get_map_grid():
+    """Returns array of static collision map"""
+    return pathf.grid

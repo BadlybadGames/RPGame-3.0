@@ -142,6 +142,7 @@ class WorldEntity(Entity):
 
         #Movement variables
         self.position = euclid.Vector2(*position)
+        self.old_pos = self.position.copy()
         self.rotation = 0
         self.mov_vel = euclid.Vector2(0.0, 0.0)
         self.mov_acc = euclid.Vector2(0.0, 0.0)

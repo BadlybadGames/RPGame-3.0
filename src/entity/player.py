@@ -1,5 +1,6 @@
 from cocos import euclid
 from cocos import collision_model as cm
+from cocos.euclid import Vector2
 
 import util
 
@@ -56,6 +57,7 @@ class Player(entity.WorldEntity):
     def update_input(self, state):
         self.attacking = state["attacking"]
         self.aim = state["aim"]
+        v = Vector2(state["movement"][0], state["movement"][1])
         self.move_dir = euclid.Vector2(*state["movement"])
 
         if self.move_dir.magnitude() > 1:

@@ -84,6 +84,7 @@ class MeleeWeaponEntity(Projectile):
 
     def update_collision(self):
         center = Vector2(*self.position) + util.rot_to_vec(self.rotation) * self.offset
+        print center, self.size
         return cm.CircleShape(center=center, r=self.size)
 
     def on_hit(self, other):

@@ -4,6 +4,7 @@ from cocos import collision_model as cm
 from cocos.euclid import Vector2
 from cocos.rect import Rect
 import pyglet
+import Box2D
 
 import logging
 from game import collision
@@ -21,6 +22,8 @@ import interface.gui
 
 LERP_TIME = 0.1
 LERP_MAX_VEL = 80
+
+PIXEL_TO_METER = 20.0  # Conversion rate of physics meter to screen pixels
 
 # TODO: Get rid of these global variables. Possibly use director.scene or director functions instead?
 game = None
@@ -72,11 +75,23 @@ def start():
     #initalize the pathfinding map
     collision.init_collision(collision_map)
 
+    #initalize the general collision system
+    grid = collision.get_map_grid()
+    for x, i in enumerate(grid):
+        for y, tile in enumerate(i):
+            if tile:
+                scale = 32/PIXEL_TO_METER
+                body = game.collision_world.CreateStaticBody(
+                    position=(x*scale, y*scale),
+                    shapes=Box2D.b2PolygonShape(box=(scale, scale)),  # TODO: non-static tile width/height
+                )
+                body.CreatePolygonFixture(box=(scale, scale))
+
     #add an enemy for testing purposes
-    enemy = entity.get_entity_type("basicenemy")()
-    enemy.position = Vector2(100, 100)
-    enemy.movement_speed = 0.35
-    game.spawn(enemy)
+    #enemy = entity.get_entity_type("basicenemy")()
+    #enemy.position = Vector2(100, 100)
+    #enemy.movement_speed = 0.35
+    #game.spawn(enemy)
 
     #Setup controls
     import interface.controls  # TODO: Add init functions for modules so late import isnt needed
@@ -90,6 +105,7 @@ def start():
     game.gui = interface.gui.Gui()  # TODO: would be better to have this is instance in the interface package
     layer.add(game.gui)
     game.gui.log.add_message("Welcome to RPGame.")
+    print "3"
     return game, layer, scroller
 
 
@@ -113,10 +129,9 @@ class Game():
         cell_size = 64*1.25  # The size used for grids for the collision manager
         self.collision = cm.CollisionManagerGrid(0, w, 0, h, cell_size, cell_size)
         self.tile_collider = collision.MapCollider()
+        self.collision_world = Box2D.b2World(gravity=(0, 0))
 
     def update(self, t):
-        self.collision.clear()
-
         #Update position then velocity
         self.tick += t
 
@@ -128,32 +143,55 @@ class Game():
 
         #Assuming all entities have collision
         for e in self.get_entities():
+            # Update physics body movement
+            v = e.move_dir.copy()
+            if v.magnitude() > 1.0:
+                v.normalize()
+            v *= e.movement_speed * 5.0  # Meters per tick at 100% movementspeed
+            e.body.linearVelocity = v.copy()
+
             # The collision detection requires objects with .cshape attributes, so we do this.
             obj = namedtuple('Shape', ("cshape", "entity"))
             obj.cshape = e.update_collision()
             obj.entity = e
             self.collision.add(obj)
 
-        self.run_collision()
+        #self.run_collision()
+        self.run_physics(t)
 
     def update_render(self, t):
         player = game.get_player()
         if player:  # Update scrolling layer
-            scroller.set_focus(*player.position, force=True)
+            scroller.set_focus(*(player.position * PIXEL_TO_METER), force=True)
 
         for e in self.get_entities():
             if e.sprite:
                 #Interpolation
                 #Interpolate over LERP_TIME
                 # TODO: Do not interpolate local objects/objects owned by us
-                v = e.position - e.sprite.position
+                v = e.position/PIXEL_TO_METER - e.sprite.position
                 if v.magnitude() > LERP_MAX_VEL:
-                    e.sprite.position = e.position
+                    e.sprite.position = e.position*PIXEL_TO_METER
                 else:
-                    e.sprite.position += v * t / LERP_TIME
+                    e.sprite.position += (v * t / LERP_TIME)*PIXEL_TO_METER
                 e.sprite.rotation = (e.sprite.rotation + e.rotation) / 2
 
+    def run_physics(self, dt):
+        world = self.collision_world
+
+        PHYS_VEL_ITERS = 10
+        PHYS_POS_ITERS = 10  # box2d simulation parameters
+
+        world.Step(dt, PHYS_POS_ITERS, PHYS_VEL_ITERS)
+
+        world.ClearForces()
+        for e in self.get_entities():
+            e.position.x = e.body.position.x
+            e.position.y = e.body.position.y
+
     def run_collision(self):
+        self.collision.clear()
+
         # First we check the tile map collision
         for e in self.get_entities():
             last = Rect(e.old_pos.x, e.old_pos.y, width=e.size, height=e.size)
@@ -233,7 +271,6 @@ class Game():
                 self.entity_count += 1
             self.entities[e.eid] = e
 
-
         if e.image:
             img = pyglet.resource.image(e.image)
             e.sprite = cocos.sprite.Sprite(img)
@@ -243,6 +280,10 @@ class Game():
             #    anchor.sprite.add(e.sprite)
             #else:
             self.sprite_batch.add(e.sprite)
+
+        #Physics body, this should be in WorldEntity, not here.
+        e.body = self.collision_world.CreateDynamicBody(position=e.position.copy()/PIXEL_TO_METER)
+        e.body.CreateCircleFixture(radius=e.size/PIXEL_TO_METER)
 
         e.on_init()
 

@@ -84,7 +84,6 @@ class PlayerController(Controller):
                 self.state["movement"][1] -= 1
             elif skey == "S":
                 self.state["movement"][1] += 1
-
         if updated:
             player = game.Game.get_player()
             if player:
