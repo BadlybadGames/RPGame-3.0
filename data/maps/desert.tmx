@@ -10,7 +10,7 @@
  </layer>
  <layer name="collision" width="30" height="30">
   <data encoding="base64" compression="zlib">
-   eJztlUsOwCAIRDmc9z9T95MKDgw0bUriwg/zEBWXma2HWrcho5u729vXuKg7yY3iyHA9v92cghvpR+PVPLP+DDeT007u6Tkymp4Ws5aNuWJ3bwhZU/UK+1P/QhTPz+3RUHEzPoq3rdxvtlYouF137s332dNWcNnzVnLZtdX/iK3lKm6GfaI1bZiPyXYBsFk0VQ==
+   eJzdlV0KwCAMgz2c9z/TXsegNUl/1AV8cLB+kdY4xxhz06rWl/HmZnlBzoZyGT8s16tfzbW+MUJ8W4wV1/MW4SLyPFdylf8t7mp/AheZDaYXUZ3GVfNZyXaUi/QzI8fZ+c1SF6eCq9RQ7n1Gb6L5/ndulm6eZ6UuymUzajc3+h7dwkXrdct62zrWAx0WSMk=
   </data>
  </layer>
 </map>

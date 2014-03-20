@@ -68,8 +68,8 @@ def start():
 
     #load the map
     background, collision_map = tilemap.init()
-    scroller.add(background, z=0)
-    scroller.add(collision_map, z=1)
+    scroller.add(background, z=-2)
+    scroller.add(collision_map, z=-1)
     scroller.add(scrolling_layer)
 
     #initalize the pathfinding map
@@ -80,10 +80,10 @@ def start():
     for x, i in enumerate(grid):
         for y, tile in enumerate(i):
             if tile:
-                scale = 32/PIXEL_TO_METER
+                # TODO: non-static tile width/height
+                scale = 32.0/PIXEL_TO_METER
                 body = game.collision_world.CreateStaticBody(
                     position=(x*scale, y*scale),
-                    shapes=Box2D.b2PolygonShape(box=(scale, scale)),  # TODO: non-static tile width/height
                 )
                 body.CreatePolygonFixture(box=(scale, scale))
 
@@ -105,7 +105,6 @@ def start():
     game.gui = interface.gui.Gui()  # TODO: would be better to have this is instance in the interface package
     layer.add(game.gui)
     game.gui.log.add_message("Welcome to RPGame.")
-    print "3"
     return game, layer, scroller
 
 
@@ -148,7 +147,7 @@ class Game():
             if v.magnitude() > 1.0:
                 v.normalize()
             v *= e.movement_speed * 5.0  # Meters per tick at 100% movementspeed
-            e.body.linearVelocity = v.copy()
+            #e.body.linearVelocity = v.copy()
 
             # The collision detection requires objects with .cshape attributes, so we do this.
             obj = namedtuple('Shape', ("cshape", "entity"))
@@ -163,18 +162,20 @@ class Game():
         player = game.get_player()
         if player:  # Update scrolling layer
             scroller.set_focus(*(player.position * PIXEL_TO_METER), force=True)
-
         for e in self.get_entities():
             if e.sprite:
-                #Interpolation
-                #Interpolate over LERP_TIME
-                # TODO: Do not interpolate local objects/objects owned by us
-                v = e.position/PIXEL_TO_METER - e.sprite.position
-                if v.magnitude() > LERP_MAX_VEL:
-                    e.sprite.position = e.position*PIXEL_TO_METER
-                else:
-                    e.sprite.position += (v * t / LERP_TIME)*PIXEL_TO_METER
-                e.sprite.rotation = (e.sprite.rotation + e.rotation) / 2
+                e.sprite.position = e.position.copy()*PIXEL_TO_METER
+                e.sprite.rotation = e.rotation
+                if False:
+                    #Interpolation
+                    #Interpolate over LERP_TIME
+                    # TODO: Do not interpolate local objects/objects owned by us
+                    v = e.position/PIXEL_TO_METER - e.sprite.position
+                    if v.magnitude() > LERP_MAX_VEL:
+                        e.sprite.position = e.position*PIXEL_TO_METER
+                    else:
+                        e.sprite.position += (v * t / LERP_TIME)*PIXEL_TO_METER
+                    e.sprite.rotation = (e.sprite.rotation + e.rotation) / 2
 
     def run_physics(self, dt):
         world = self.collision_world
@@ -232,7 +233,8 @@ class Game():
         return (self.get_entity(i) for i in self.entities if i and self.get_entity(i).is_player)
 
     def get_entities(self):
-        return (e for e in self.entities.values() + self.local_entities.values() if e)
+        r = [e for e in self.entities.values() + self.local_entities.values() if e is not None]
+        return r
 
     def set_player(self, eid):
         self.controlled_player = eid
@@ -258,7 +260,7 @@ class Game():
         if not force:
             # First figure out if we should spawn
             if not e.controlled_by == self.get_player_id():
-               return
+                return
 
         if not force and self.is_client(): # We need confirmation from the server
             if not hasattr(e, "eid"):
@@ -274,6 +276,7 @@ class Game():
         if e.image:
             img = pyglet.resource.image(e.image)
             e.sprite = cocos.sprite.Sprite(img)
+            e.sprite.position = e.position.copy() * PIXEL_TO_METER
             e._init_sprite(e.sprite)
             #if e.attached_to:
             #    anchor = self.get_entity(e.attached_to)
@@ -282,8 +285,12 @@ class Game():
             self.sprite_batch.add(e.sprite)
 
         #Physics body, this should be in WorldEntity, not here.
-        e.body = self.collision_world.CreateDynamicBody(position=e.position.copy()/PIXEL_TO_METER)
-        e.body.CreateCircleFixture(radius=e.size/PIXEL_TO_METER)
+        if e.etype == "projectile":
+            e.body = self.collision_world.CreateKinematicBody(position=e.position.copy())
+            e.body.CreateCircleFixture(radius=(e.size/PIXEL_TO_METER)/2, restitution=0, density=0.2)
+        else:
+            e.body = self.collision_world.CreateDynamicBody(position=e.position.copy(), linearDamping=4.0)
+            e.body.CreateCircleFixture(radius=(e.size/PIXEL_TO_METER)/2, restitution=0)
 
         e.on_init()
 
@@ -295,6 +302,9 @@ class Game():
             self.local_entities[e.eid] = None # It is now dead
         if e.eid in self.entities.keys():
             self.entities[e.eid] = None # DEAD!
+        if hasattr(e, "body"):
+            self.collision_world.DestroyBody(e.body)
+
 
     def get_entity_type(self, name):
         return entity.types["name"]

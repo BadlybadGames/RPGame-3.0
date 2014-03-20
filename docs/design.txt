@@ -1,0 +1,81 @@
+#### 1. Core mechanics/features ####
+
+	Deep class-less character customization where you can get skills from any "class"
+
+	Teamwork survival?
+
+
+#### 2. Design Goals ####
+
+	* Customization over power/choice matters
+		A level 20 item should not have too much higher item over a level 30 item, instead, the higher level ones
+		may be more varied/extreme (though some power increase on average is required to not make a player use
+		the one really cool weapon he found at level 5 for the whole game)
+
+		You should not be forced between powering up your bread and butter skill over getting a new skill
+			how: Possibly have different soorts of skill points (unlock a new skill every second level, a new
+				passive every level, "customization upgrade"(like Diablo3 runes) every 3rd level)
+
+		Weapons, and especially weapon types should have fundemental meechanical differences
+			i.e. Halberds are very slow and lower mobility/turn rate, but have huge reach and arcs
+				To expand on this, possibly have weapons have combos, maybe even several combos on a single
+				weapon. For example, a sword could have a stabbing attack, or a combo with 3 slashes.
+
+#### Meta game ideas ####
+
+	Game mode ideas:
+		*Linear campaign with slight variances
+		*Campaign "spinoff" that is much more random
+
+	Traversing a 2d grid map where you choose what zones to fight in, that have different enemies/obstacles
+
+	Have a sort of base in the middle of the map/on the bottom that you can upgrade?
+		The base could affect the "main game" like in elona shooter, possibly be what you have to defend, etc.
+
+
+#### Enemies ####
+
+	Enemies can have different behaviours that can be manipulated by spells and effects
+		Some enemies may be aggressive/suicidal, making them less likely to hide when low on life
+
+		Have an intelligence attribute that affects how likely AI is to choose smart results
+			For example, low intelligence may make an enemy more likely to be fooled by an illusion, or
+			make it unable to find the way when the path is too complex, or choose to focus on a tanky target
+			instead of a squishy one.
+				+This makes cannon fodder enemies less computing heavy
+
+		Reflex parameter that affects how quick enemies are to react
+
+	Enemy mutations, pretty much suffix/affix mod system
+		For example, there could be a "Brawny" mutation that would give the enemy more hp and larger size, but
+		also decrease its intelligence, and increase its suicidal behaviour parameter
+
+#### Misc ideas ####
+
+	Class/skill ideas:
+		Hipstermancy - Fireballs are too main stream, use firecubes instead.
+
+		Spells that manipulate the map, like putting a stone wall to block
+
+	Spell combination
+		Projectile with AoE damage on arrival + DoT that spreads on death -> DoT that explodes and spreads
+		on death
+
+	Time manipulation spells
+
+	Item crafting, weapons have components, you can mix and match components to create sort of new weapons,
+	salvage old items to get their components etc.
+
+	Race selection on birth that have some special attributes
+
+	Mutations DCCS style, possibly for a race? a class? general system?
+
+
+#### Misc design notes ####
+
+	Pure buffs = bad! Boring buffs = bad!
+		Bad: "Activate to give you and your allies 10% damage reduction for 100 minutes. 20 sec cooldown"
+			Active skills that are activate and forget/you press one time every 10 minutes because you have to are in general bad. Should be psasive instead
+		Better: "Activate to give nearby allies 20% movementspeed and 30% damage reduction for 10 seconds. 30 sec cooldown"
+			Noticable effects are better than statistical effects, and this version requires management and possibly cooperation
+		Also good: "<do some sort of interesting attack to enemies>, if this attack hits, you and your allies temporarily recieve some bonus"

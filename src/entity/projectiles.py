@@ -67,24 +67,27 @@ class MeleeWeaponEntity(Projectile):
     def _init_sprite(self, sprite): # TODO: Sprite still isnt centered on player
         sprite.transform_anchor = sprite.get_rect().midbottom
 
-    def update(self, t):
-        #super(MeleeWeaponEntity, self).update(t)
-
+    def update_movement(self, t):
         wielder = game.Game.get_entity(self.wielder)
 
         self.position = wielder.position.copy()
+
+    def update(self, t):
+        super(MeleeWeaponEntity, self).update(t)
+
+        wielder = game.Game.get_entity(self.wielder)
 
         swing_v = float(self.arc) / self.duration
         self.rotation_off = self.rotation_off + swing_v * t
         self.rotation = wielder.rotation + self.rotation_off
 
-        self.duration_left -= t
-        if self.duration_left <= 0:
-            self.die()
+        #self.duration_left -= t
+        #if self.duration_left <= 0:
+        #   self.die()
 
     def update_collision(self):
         center = Vector2(*self.position) + util.rot_to_vec(self.rotation) * self.offset
-        print center, self.size
+        #print center, self.size
         return cm.CircleShape(center=center, r=self.size)
 
     def on_hit(self, other):

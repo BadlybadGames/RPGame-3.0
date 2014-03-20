@@ -31,7 +31,7 @@ class MainMenu(cocos.menu.Menu):
         game.start()
 
         player = entity.get_entity_type("player")()
-        player.position.x, player.position.y = (200, 200)
+        player.position.x, player.position.y = (10, 10)
 
         game.Game.spawn(player)
         game.Game.set_player(player.eid)

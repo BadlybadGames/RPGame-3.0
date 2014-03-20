@@ -3,8 +3,11 @@ import util
 import entity
 import events
 import game
+
+
 class Equipment(entity.Entity):
     pass
+
 
 class Weapon(Equipment):
     attack_sounds = ()
@@ -28,20 +31,24 @@ class BowWeapon(Weapon):
         self.proj_length = 40
         self.proj_life = 3.0
         self.proj_speed = 10
+        self.attack_speed = 1.0
 
     def attack(self):
-        wielder = self.get_wielder()
+        real_wielder = self.get_wielder()
 
         e = entity.get_entity_type("Projectile")()
 
         e.damage = 20
-        e.controlled_by = self.wielder
-        e.position = wielder.position.copy()
+        e.controlled_by = real_wielder.controlled_by
+        e.position = real_wielder.position.copy()
         e.duration = self.proj_life
-        e.rotation = wielder.rotation
+        e.rotation = real_wielder.rotation
         e.move_dir = euclid.Vector2(*util.rot_to_vec(e.rotation))
+
         game.Game.spawn(e)
-        
+
+        e.body.linearVelocity = util.rot_to_vec(e.rotation) * self.proj_speed  # TODO: This should be set in the projectille itself (currently cant because of physics body being created after the instance)
+
         if game.Game.is_controlled(e):
             events.dispatch("on_attack", self.get_wielder(), self, e)
 
@@ -62,7 +69,7 @@ class MeleeWeapon(Weapon):
         self.damage = 20
 
     def attack(self):
-        real_wielder = self.get_wielder() # The real entity (not the eid)
+        real_wielder = self.get_wielder()  # The real entity (not the eid)
         e = entity.get_entity_type("MeleeWeaponEntity")()
         e.damage = self.damage
         e.attached_to = self.wielder
@@ -74,12 +81,12 @@ class MeleeWeapon(Weapon):
         e.offset = self.offset
         e.arc = self.arc
         e.size = self.size
-        e.rotation_off = -self.arc/2
+        e.rotation_off = -self.arc / 2
         game.Game.spawn(e)
-
 
         if game.Game.is_controlled(e):
             events.dispatch("on_attack", self.get_wielder(), self, e)
+
 
 weapons = (BowWeapon, MeleeWeapon)
 

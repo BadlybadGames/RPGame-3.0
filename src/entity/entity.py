@@ -2,6 +2,7 @@ import logging
 
 import cocos
 from cocos import euclid
+from cocos.euclid import Vector2
 import game
 
 logger = logging.getLogger("entity")
@@ -62,29 +63,10 @@ class Entity(object):
         return e
 
 
-    def update_movement(self, t):
-        """This is called by update and explicitly by the server when updating 
-        input from clients"""
-        self.old_pos = self.position.copy()
-        self.mov_acc = self.move_dir * self.acc_speed
-
-        self.position += (self.mov_vel * t + (self.mov_acc * t / 2)) * self.movement_speed
-        self.mov_vel += self.mov_acc * t
-
-        #perform friction. Improve pls!
-        self.mov_vel = self.mov_vel * ((1 - t) * 0.5)
 
 
     def update(self, t):
-        #Set our acceleration according to user input
-        self.update_movement(t)
-
-        #See if we want to and can attack
-        if self.attacking and self.attack_cooldown < 0:
-            self.attack()
-
-        if self.attack_cooldown >= 0:
-            self.attack_cooldown -= t
+        pass
 
     def update_from_json(self, json):
         for k, v in json.items():
@@ -119,7 +101,7 @@ class Entity(object):
             if k.startswith("_"):  # Ignore builtins
                 continue
 
-            if k in ("sprite","xp_needed"):  # TODO: Possibly try to find a cleaner way
+            if k in ("sprite", "xp_needed", "body", "ai"):  # TODO: Possibly try to find a cleaner way
                 continue
 
             v = getattr(self, k)
@@ -151,7 +133,7 @@ class WorldEntity(Entity):
         self.acc_speed = 200
         self.turn_speed = 400  # Degrees/second
         self.aim = (30, 30)  # Our desired point of target
-        self.size = 32
+        self.size = 30
 
         self.max_hp = 100
         self.hp = self.max_hp
@@ -166,6 +148,33 @@ class WorldEntity(Entity):
 
     def on_init(self):
         pass
+
+    def update(self, t):
+        super(WorldEntity, self).update(t)
+
+        #Set our acceleration according to user input
+        self.update_movement(t)
+
+        #See if we want to and can attack
+        if self.attacking and self.attack_cooldown < 0:
+            self.attack()
+
+        if self.attack_cooldown >= 0:
+            self.attack_cooldown -= t
+
+    def update_movement(self, t):
+            """This is called by update and explicitly by the server when updating
+            input from clients. Override for entities with a non-standard way of updating their position (see: melee
+             weapons"""
+            self.old_pos = self.position.copy()
+            self.mov_acc = self.move_dir * self.acc_speed
+
+            f = self.move_dir * t * self.movement_speed * 930
+            self.body.ApplyForceToCenter(force=f, wake=True)
+            self.mov_vel += self.mov_acc * t
+
+            #perform friction. Improve pls!
+            self.mov_vel = self.mov_vel * ((1 - t) * 0.5)
 
     def die(self):
         self.on_die()
