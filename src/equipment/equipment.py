@@ -43,11 +43,11 @@ class BowWeapon(Weapon):
         e.position = real_wielder.position.copy()
         e.duration = self.proj_life
         e.rotation = real_wielder.rotation
-        e.move_dir = euclid.Vector2(*util.rot_to_vec(e.rotation))
+        e.move_dir = util.rot_to_vec(e.rotation)
 
         game.Game.spawn(e)
 
-        e.body.linearVelocity = util.rot_to_vec(e.rotation) * self.proj_speed  # TODO: This should be set in the projectille itself (currently cant because of physics body being created after the instance)
+        #e.body.linearVelocity = util.rot_to_vec(e.rotation) * self.proj_speed  # TODO: This should be set in the projectille itself (currently cant because of physics body being created after the instance)
 
         if game.Game.is_controlled(e):
             events.dispatch("on_attack", self.get_wielder(), self, e)

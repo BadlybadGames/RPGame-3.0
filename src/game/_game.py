@@ -1,3 +1,4 @@
+from Box2D.Box2D import b2ContactListener
 import cocos
 from cocos.director import director
 from cocos import collision_model as cm
@@ -81,9 +82,10 @@ def start():
         for y, tile in enumerate(i):
             if tile:
                 # TODO: non-static tile width/height
-                scale = 32.0/PIXEL_TO_METER
+                scale = 32.0 / PIXEL_TO_METER
                 body = game.collision_world.CreateStaticBody(
-                    position=(x*scale, y*scale),
+                    position=(x * scale, y * scale),
+                    userData = {"type": "wall"}
                 )
                 body.CreatePolygonFixture(box=(scale, scale))
 
@@ -95,6 +97,7 @@ def start():
 
     #Setup controls
     import interface.controls  # TODO: Add init functions for modules so late import isnt needed
+
     c = interface.controls.init()
     layer.add(c)
 
@@ -108,6 +111,48 @@ def start():
     return game, layer, scroller
 
 
+# TODO: Should there be a physics.py module for this + other physics stuff?
+class _ContactListener(Box2D.b2ContactListener):
+
+    def BeginContact(self, contact):
+        pass
+
+    def EndContact(self, contact):
+        pass
+
+    def PreSolve(self, contact, oldManifold):
+        """Handles collision events
+
+        Possible cases:
+        Entity vs Entity: collide + event
+        Entity vs Wall: collide
+        Entity vs Projectile: event
+        Projectile vs Wall: event (should collide if die?)
+        Projectile vs Projectile: Nothing? (or event?)
+        """
+        #TODO: this needs optimization
+        a = contact.fixtureA.body.userData
+        b = contact.fixtureB.body.userData
+
+        if a["type"] == "wall" or b["type"] == "wall":
+            wall, other = a["type"] == "wall" and (a, b) or (b, a)
+            if other["entity"].collides_with & entity.F_WALL:
+                other["entity"].on_collision(other=None, typ="wall")
+                return
+            else:
+                return
+
+        #Collision currently assumed to be reflective
+        if a["entity"].collides_with & b["entity"].collision_type:
+            a["entity"].on_collision(b["entity"], typ=b["entity"].collision_type)
+            b["entity"].on_collision(a["entity"], typ=a["entity"].collision_type)
+            return
+
+
+    def PostSolve(self, contact, impulse):
+        pass
+
+
 class Game():
     """Game state
 
@@ -116,26 +161,26 @@ class Game():
     """
 
     def __init__(self):
-        self.player_id = 0 # Our client id, 0 means server/single player/not yet set.
+        self.player_id = 0  # Our client id, 0 means server/single player/not yet set.
         self.entities = {}
         self.local_entities = {}
         self.controlled_player = None
         self.tick = 0
         self.entity_count = 0
-        self.local_entity_count = 0
 
         w, h = director.get_window_size()
-        cell_size = 64*1.25  # The size used for grids for the collision manager
+        cell_size = 64 * 1.25  # The size used for grids for the collision manager
         self.collision = cm.CollisionManagerGrid(0, w, 0, h, cell_size, cell_size)
         self.tile_collider = collision.MapCollider()
-        self.collision_world = Box2D.b2World(gravity=(0, 0))
+        self.collision_world = Box2D.b2World(gravity=(0, 0),
+                                             contactListener=_ContactListener())
 
     def update(self, t):
         #Update position then velocity
         self.tick += t
 
         #update the level
-        #self.level.on_update(t)
+        self.level.on_update(t)
 
         for i in self.get_entities():
             self.update_entity(i, t)
@@ -164,17 +209,17 @@ class Game():
             scroller.set_focus(*(player.position * PIXEL_TO_METER), force=True)
         for e in self.get_entities():
             if e.sprite:
-                e.sprite.position = e.position.copy()*PIXEL_TO_METER
+                e.sprite.position = e.position.copy() * PIXEL_TO_METER
                 e.sprite.rotation = e.rotation
                 if False:
                     #Interpolation
                     #Interpolate over LERP_TIME
                     # TODO: Do not interpolate local objects/objects owned by us
-                    v = e.position/PIXEL_TO_METER - e.sprite.position
+                    v = e.position / PIXEL_TO_METER - e.sprite.position
                     if v.magnitude() > LERP_MAX_VEL:
-                        e.sprite.position = e.position*PIXEL_TO_METER
+                        e.sprite.position = e.position * PIXEL_TO_METER
                     else:
-                        e.sprite.position += (v * t / LERP_TIME)*PIXEL_TO_METER
+                        e.sprite.position += (v * t / LERP_TIME) * PIXEL_TO_METER
                     e.sprite.rotation = (e.sprite.rotation + e.rotation) / 2
 
     def run_physics(self, dt):
@@ -216,12 +261,15 @@ class Game():
 
     def update_entity(self, ent, t):
         ent.update(t)
+        if ent.dead:
+            self.despawn(ent)
 
     def set_level(self, lvl):
         self.level = lvl
 
     def get_entity(self, eid):
-        return self.entities.get(eid)
+        all_entities = dict(self.entities.items() + self.local_entities.items())
+        return all_entities.get(eid)
 
     def get_player(self):
         return self.get_entity(self.controlled_player)
@@ -230,80 +278,117 @@ class Game():
         """ Returns entities (not eids) that are considered players
 
         """
-        return (self.get_entity(i) for i in self.entities if i and self.get_entity(i).is_player)
+        ents = dict(self.entities.items()+self.local_entities.items())
+        return (e for e in ents.values() if e and e.is_player)
 
     def get_entities(self):
+        """Return all entities in the world
+
+        @rtype: list
+        @return: List of entities
+        """
         r = [e for e in self.entities.values() + self.local_entities.values() if e is not None]
         return r
 
     def set_player(self, eid):
         self.controlled_player = eid
+        self.set_player_id(eid)
 
     def set_player_id(self, i):
+        """Set the client's player id
+
+        @type i: int
+        @param i: Id to set the player id to
+        """
         self.player_id = i
 
     def get_player_id(self):
+        """Return the client's player id
+
+        @rtype: int
+        @return:
+        """
         return self.player_id
 
-    def is_controlled(self, entity):
-        return entity.controlled_by == self.get_player_id()
+    def is_controlled(self, ent):
+        """Return True if ent is an entity our player owns
+
+        @type ent: entity.Entity
+
+        @rtype: bool
+        """
+        return ent.controlled_by == self.get_player_id()
 
     def is_client(self):
+        """
+        Return True if we are a client in a multiplayer game.
+
+        @rtype: bool
+        @return: True if we are a client in a multiplayer game
+        """
         return self.player_id != 0
 
-    def spawn(self, e, force=False):
-        """Spawn an entity to the game world
-
-        e: type of entity that should be spawned
-        force: if True will ignore regular checks that would prevent the spawning
+    def spawn(self, ent, force=False):
         """
-        if not force:
-            # First figure out if we should spawn
-            if not e.controlled_by == self.get_player_id():
-                return
+        Spawn an entity to the game world
 
-        if not force and self.is_client(): # We need confirmation from the server
-            if not hasattr(e, "eid"):
-                e.eid = self.local_entity_count + 1
-                self.local_entity_count += 1
-            self.local_entities[e.eid] = e
-        else:
-            if not hasattr(e, "eid"):
-                e.eid = self.entity_count + 1
+        @type ent: entity.WorldEntity
+        @param ent: entity to add to the game world
+        @type force: bool
+        @param force: if True will ignore regular checks that would prevent the spawning
+        """
+
+        if not force and self.is_client():  # We need confirmation from the server
+            if not hasattr(ent, "eid"):
+                ent.eid = self.entity_count + 1
                 self.entity_count += 1
-            self.entities[e.eid] = e
+            self.local_entities[ent.eid] = ent
+        else:
+            if not hasattr(ent, "eid"):
+                ent.eid = self.entity_count + 1
+                self.entity_count += 1
+            self.entities[ent.eid] = ent
 
-        if e.image:
-            img = pyglet.resource.image(e.image)
-            e.sprite = cocos.sprite.Sprite(img)
-            e.sprite.position = e.position.copy() * PIXEL_TO_METER
-            e._init_sprite(e.sprite)
+        if ent.image:
+            img = pyglet.resource.image(ent.image)
+            ent.sprite = cocos.sprite.Sprite(img)
+            ent.sprite.position = ent.position.copy() * PIXEL_TO_METER
+            ent._init_sprite(ent.sprite)
             #if e.attached_to:
             #    anchor = self.get_entity(e.attached_to)
             #    anchor.sprite.add(e.sprite)
             #else:
-            self.sprite_batch.add(e.sprite)
+            self.sprite_batch.add(ent.sprite)
 
         #Physics body, this should be in WorldEntity, not here.
-        if e.etype == "projectile":
-            e.body = self.collision_world.CreateKinematicBody(position=e.position.copy())
-            e.body.CreateCircleFixture(radius=(e.size/PIXEL_TO_METER)/2, restitution=0, density=0.2)
-        else:
-            e.body = self.collision_world.CreateDynamicBody(position=e.position.copy(), linearDamping=4.0)
-            e.body.CreateCircleFixture(radius=(e.size/PIXEL_TO_METER)/2, restitution=0)
+        #if ent.etype == "projectile":
+        #    ent.body = self.collision_world.CreateKinematicBody(position=ent.position.copy())
+        #    #e.body.CreateCircleFixture(radius=(e.size/PIXEL_TO_METER)/2, restitution=0, density=0.2)
+        _ud = {"type": "entity",
+               "entity": ent}  # TODO: keeping a reference to the actual entity might be harmful in multiplayer environment.
 
-        e.on_init()
+        ent.body = self.collision_world.CreateDynamicBody(position=ent.position.copy(), linearDamping=4.0,
+                                                          userData=_ud)
+        ent.body.CreateCircleFixture(radius=(ent.size / PIXEL_TO_METER) / 2, restitution=0)
 
-    def despawn(self, e):
-        if e.sprite:
-            self.sprite_batch.remove(e.sprite)
-            e.sprite = None
-        if e.eid in self.local_entities.keys():
-            self.local_entities[e.eid] = None # It is now dead
-        if e.eid in self.entities.keys():
-            self.entities[e.eid] = None # DEAD!
-        if hasattr(e, "body"):
-            self.collision_world.DestroyBody(e.body)
+        ent.on_init()
+
+    def despawn(self, ent):
+        """Remove an entity from the game world
+
+        @type ent: entity.Entity
+        @param ent:
+        @return:
+        """
+        if ent.sprite:
+            self.sprite_batch.remove(ent.sprite)
+            ent.sprite = None
+        if ent.eid in self.local_entities.keys():
+            self.local_entities[ent.eid] = None  # It is now dead
+        if ent.eid in self.entities.keys():
+            self.entities[ent.eid] = None  # DEAD!
+        if hasattr(ent, "body"):
+            self.collision_world.DestroyBody(ent.body)
 
 
     def get_entity_type(self, name):

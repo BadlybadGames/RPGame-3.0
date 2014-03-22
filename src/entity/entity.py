@@ -5,6 +5,10 @@ from cocos import euclid
 from cocos.euclid import Vector2
 import game
 
+F_ENTITY = 1
+F_PROJECTILE = 2
+F_WALL = 4
+
 logger = logging.getLogger("entity")
 
 types = {}
@@ -69,6 +73,11 @@ class Entity(object):
         pass
 
     def update_from_json(self, json):
+        """Update our state based on information received from the network
+
+        @type json: dict
+        @param json: dict representation of the entity, gotten over the network
+        """
         for k, v in json.items():
             if k == "eid":  # We dont want to update an eid after the entity has been made. Especially not if its from a client
                 continue
@@ -116,6 +125,10 @@ class Entity(object):
 
 class WorldEntity(Entity):
     """A physical entity that usually has a physical appearance"""
+    collision_type = F_ENTITY
+    collides_with = F_ENTITY + F_PROJECTILE + F_WALL
+
+    xp_worth = 0
 
     def __init__(self, position=(0,0)):
         super(WorldEntity, self).__init__()
@@ -138,7 +151,6 @@ class WorldEntity(Entity):
         self.max_hp = 100
         self.hp = self.max_hp
 
-        self.xp_worth = 0
         self.level = 1
 
         self.attacking = False
@@ -178,7 +190,7 @@ class WorldEntity(Entity):
 
     def die(self):
         self.on_die()
-        game.Game.despawn(self)
+        self.dead = True
 
     def on_die(self):
         """ Called when we die, should be safe to overload. usually
@@ -186,13 +198,22 @@ class WorldEntity(Entity):
         """
         pass
 
-    def on_collision(self, other):
+    def on_collision(self, other, typ):
+        """Called when we hit another entity or the collision map
+
+        @type other: entity.WorldEntity or None
+        @param other: The entity we hit or None if we hit the collision map
+        @param typ: The type we collided with, one of "Wall", "Projectile" and "Entity"
+        """
         pass
 
     def take_damage(self, damage):
         """Deal damage to this entity
 
+        @type damage: float
         @param damage: damage to be dealt
+
+        @rtype: float
         @return: final damage taken
         """
         self.hp -= damage

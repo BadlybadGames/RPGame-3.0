@@ -55,6 +55,11 @@ class Player(entity.WorldEntity):
             self.attack_cooldown += self.weapon.attack_speed
 
     def update_input(self, state):
+        """Update our entity state based on player input
+
+        @type state: dict
+        @param state: A state from interface.controls
+        """
         self.attacking = state["attacking"]
         self.aim = state["aim"]
         v = Vector2(state["movement"][0], state["movement"][1])

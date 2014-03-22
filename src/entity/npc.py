@@ -37,7 +37,7 @@ class npc(entity.WorldEntity):
     def update_collision(self):
         return cm.CircleShape(center=self.position, r=self.size)
 
-    def on_collision(self, other):
+    def on_collision(self, other, typ):
         pass
 
 class BasicEnemy(npc):

@@ -10,6 +10,7 @@ class Projectile(entity.WorldEntity):
 
     etype = "projectile"
     name = "Projectile"
+    collides_with = entity.F_WALL + entity.F_ENTITY
 
     def __init__(self, **kwargs):
         super(Projectile, self).__init__()
@@ -21,26 +22,31 @@ class Projectile(entity.WorldEntity):
         if self.duration <= 0:
             self.die()
 
+    def update_movement(self, t):
+        super(Projectile, self).update_movement(t)
+
     def update_collision(self):
         return cm.CircleShape(center=self.position, r=self.size)
 
-    def on_collision(self, other):
+    def on_collision(self, other, typ):
+        #print "Hello collision"
+
+        if typ == "wall":
+            #print "was wall"
+            self.die()
+            return
 
         success = False
         owner = game.Game.get_entity(self.controlled_by)
-
         if not owner:
+            #print "no has owner"
             return
 
-        if owner.etype == "player":
-            if other.etype == "enemy":
-                success = True
-        elif owner.etype == "enemy":
-            if other.etype == "player":
-                success = True
+        if other is owner:
+            #print "was owner"
+            return
 
-        if success:
-            self.on_hit(other)
+        self.on_hit(other)
 
     def on_hit(self, other):
         """Called when a collision occurs"""

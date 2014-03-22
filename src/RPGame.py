@@ -21,7 +21,6 @@ def init_logging():
     with open("logging.json", 'rt') as f:
         config = json.load(f)
     if interface.settings.get("game", "enable-logging") == "True":
-        print "is debug"
         f = open("error.log", "w")
         sys.stderr = f
         logging.config.dictConfig(config)
