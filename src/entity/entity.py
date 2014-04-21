@@ -30,6 +30,13 @@ def new_entity(entity):
     types[name] = entity
 
 def get_entity_type(name):
+    """Returns the entity type with .name equal to name
+
+    @type name: str
+    @param name: Name of entity type
+    @rtype: WorldEntity
+    @return: An entity type whose name is equal to name given
+    """
     return types[name]
 
 

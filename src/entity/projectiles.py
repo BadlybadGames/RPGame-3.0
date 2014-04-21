@@ -29,21 +29,17 @@ class Projectile(entity.WorldEntity):
         return cm.CircleShape(center=self.position, r=self.size)
 
     def on_collision(self, other, typ):
-        #print "Hello collision"
 
         if typ == "wall":
-            #print "was wall"
             self.die()
             return
 
         success = False
         owner = game.Game.get_entity(self.controlled_by)
         if not owner:
-            #print "no has owner"
             return
 
         if other is owner:
-            #print "was owner"
             return
 
         self.on_hit(other)
