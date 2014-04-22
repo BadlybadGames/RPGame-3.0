@@ -12,7 +12,7 @@ import interface.menus
 import audio
 import interface
 
-pyglet.resource.path = [".", "../data/maps", "../res/sfx", "../res/sprites", "../res/music"]
+pyglet.resource.path = [".", "../data/maps", "../res/sfx", "../res/sprites", "../res/music", "../res/textures/ui/bars"]
 pyglet.resource.reindex()
 
 audio.play_song("maintheme.mp3")

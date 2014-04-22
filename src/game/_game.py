@@ -19,6 +19,7 @@ import level
 import audio
 import tilemap
 
+import interface
 import interface.gui
 
 LERP_TIME = 0.1
@@ -97,6 +98,8 @@ def start():
 
     #Setup controls
     import interface.controls  # TODO: Add init functions for modules so late import isnt needed
+
+    interface.gui.init()  # TODO: Figure out why it has to go here instead of earlier
 
     c = interface.controls.init()
     layer.add(c)
