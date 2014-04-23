@@ -4,21 +4,24 @@ from pyglet import graphics
 from pyglet.gl import *
 import game
 
-_textures = {}
+_textures = {"default":{}}
 
 def init():
     global _textures
 
     bar_left = pyglet.resource.texture("left.png")
-    middle_empty = pyglet.resource.texture("test_3.png")
-    middle_filled = pyglet.resource.texture("middle_filled.png")
-    _textures["left"] = bar_left
-    _textures["empty"] = middle_empty
-    _textures["filled"] = middle_filled
+    bar_right = pyglet.resource.texture("right.png")
+    middle_unfilled = pyglet.resource.texture("middle_unfilled.png")
+    middle_filled = pyglet.resource.texture("middle_filled_2.png")
+    _textures["default"]["left"] = bar_left
+    _textures["default"]["right"] = bar_right
+    _textures["default"]["unfilled"] = middle_unfilled
+    _textures["default"]["filled"] = middle_filled
+    _textures["default"]["fill_color_border"] = 5
 
 class Bar(cocos.cocosnode.CocosNode):
 
-    def __init__(self, x, y, w, h, color=(255,)*3*4, factor=1.0):
+    def __init__(self, x, y, w, h, color=(255,)*3*4, factor=1.0, style="default"):
         """
 
         @param x:
@@ -27,15 +30,17 @@ class Bar(cocos.cocosnode.CocosNode):
         @param h:
         @param color: (R,G,B) * 4, color parameters for each vertex
         @param factor: how filled the bar is, 0.0 is 0% filled, 1.0 is 100% filled
+        @param style: border graphics style
         """
         super(Bar, self).__init__()
 
         self.x = x
         self.y = y
-        self.w = 64.0
-        self.h = 32.0#128.0
+        self.w = w
+        self.h = h#128.0
         self.factor = factor
         self.color = color
+        self._texes = _textures[style]
 
         self._update()
 
@@ -49,19 +54,36 @@ class Bar(cocos.cocosnode.CocosNode):
         w = self.w  #* self.factor
         h = self.h
 
-        print(self.w, self.h)
 
         OUTLINE_THICKNESS = 2
 
-        tex = _textures["empty"]#.get_image_data()#.get_data("RGBA", 4)
+        tex = self._texes["unfilled"]#.get_image_data()#.get_data("RGBA", 4)
         #h = self.h = tex.height
         tw = w/tex.width
         th = h/tex.height #self.h/tex.width
-        _pos = (x, y,
-                     x+w, y,
-                     x+w, y+h,
-                     x, y+h)
+
+        length_of_fill = self.w - self._texes["left"].width*2
+        tx = x + self._texes["left"].width
+        pw = w - self._texes["left"].width - self._texes["right"].width
+        pw *= self.factor
+        unw = w - self._texes["left"].width - self._texes["right"].width  # This is the same as pw, just not modified by factor (yes, needs some refactoring)
+
+        _pos = (tx, y,
+                     tx+pw, y,
+                     tx+pw, y+h,
+                     tx, y+h)
         _tex = (0,0, tw,0, tw,th, 0,th)
+
+        fh = h - self._texes["fill_color_border"] * 2
+        fy = y + self._texes["fill_color_border"]
+        _fill_pos = (tx, fy,
+                            tx+pw, fy,
+                            tx+pw, fy+fh,
+                            tx, fy+fh)
+        _unfill_pos = (tx, y,
+                         tx+unw, y,
+                         tx+unw, y+h,
+                         tx, y+h)
 
         th = OUTLINE_THICKNESS
         _outline_pos = (x - th, y - th,
@@ -74,29 +96,46 @@ class Bar(cocos.cocosnode.CocosNode):
         #                                          ("v2f", _outline_pos),
         #                                          ("c3B", (0,)*3*4))
 
+
+        self.unfill_vlist = graphics.vertex_list(4,
+                                                ("v2f", _unfill_pos),
+                                                ("t2f", _tex))
+
         self.vertex_list = graphics.vertex_list(4,
                                                 ("v2f", _pos),
                                                 ("t2f", _tex))
-                                                #("c3B", self.color))
+
+        self.fill_colour_vlist = graphics.vertex_list(4,
+                                                         ("v2f", _fill_pos),
+                                                         ("c3B", self.color))
 
     def draw(self):
-        length_of_middle = self.w - _textures["left"].width*2
+        #left_fill = length_of_fill * self.factor
 
-        #_textures["left"].blit(x, y)
-        #x += _textures["left"].width
-
-        #if self.outline_vlist and self.factor != 0.0:
-        #    self.outline_vlist.draw(GL_QUADS)
         if self.vertex_list:
-            tex = _textures["empty"]#.get_image_data()#.get_data("RGBA", 4)
-            glEnable(tex.target)
-            glBindTexture(tex.target, tex.id)
+            offset = self._texes["right"].width
+            self._texes["left"].blit(self.x, self.y)
+            self._texes["right"].blit(self.x+self.w-offset, self.y)
+
+            #Draw the fill background
+            tex = self._texes["unfilled"]
             glTexParameterf(tex.target, GL_TEXTURE_WRAP_S, GL_CLAMP)
             glTexParameterf(tex.target, GL_TEXTURE_WRAP_T, GL_CLAMP)
             glTexParameterf(tex.target, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
             glTexParameterf(tex.target, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+            glEnable(tex.target)
+            glBindTexture(tex.target, tex.id)
+
+            self.unfill_vlist.draw(GL_QUADS)
+
+            #Draw the fill
+            glBindTexture(tex.target, False)  # We need to unset the texture for the colour drawing
+            self.fill_colour_vlist.draw(GL_QUADS)
+            tex = self._texes["filled"]#.get_image_data()#.get_data("RGBA", 4)
+            glBindTexture(tex.target, tex.id)
 
             self.vertex_list.draw(GL_QUADS)
+
 
             glDisable(tex.target)
 
@@ -170,12 +209,16 @@ class Gui(cocos.layer.Layer):
         super(Gui, self).__init__()
 
         #Gradiented colours
-        red = (255, 0, 0, 255, 0, 0, 255, 130, 130, 255, 130, 130)
-        blue = (0, 0, 255, 0, 0, 255, 130, 130, 255, 130, 130, 255)
-        green = (0, 255, 0, 0, 255, 0, 130, 255, 130, 130, 255, 130)
-        self.hp_bar = Bar(50, 50, 200, 30, color=red)
-        self.mana_bar = Bar(50, 50+40*1, 200, 30, color=blue)
-        self.xp_bar = Bar(50, 50+40*2, 200, 30, color=green)
+        g_red = (255, 0, 0, 255, 0, 0, 255, 130, 130, 255, 130, 130)
+        g_blue = (0, 0, 255, 0, 0, 255, 130, 130, 255, 130, 130, 255)
+        g_green = (0, 255, 0, 0, 255, 0, 130, 255, 130, 130, 255, 130)
+        #Regular
+        red = (255, 0, 0)*4
+        blue = (0, 0, 255)*4
+        green = (0, 255, 0)*4
+        self.hp_bar = Bar(50, 50, 200, 32, color=red)
+        self.mana_bar = Bar(50, 50+40*1, 200, 32, color=blue)
+        self.xp_bar = Bar(50, 50+40*2, 200, 32, color=green)
 
         self.log = MessageLog()
         self.log.position = (50, 160)
@@ -197,4 +240,4 @@ class Gui(cocos.layer.Layer):
         self.hp_bar.set_factor(f)
 
         f = min(max(float(player.xp) / player.xp_needed, 0), 1.0)
-        #self.xp_bar.set_factor(f)
+        self.xp_bar.set_factor(f)
