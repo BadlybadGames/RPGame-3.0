@@ -153,7 +153,7 @@ class WorldEntity(Entity):
         self.acc_speed = 200
         self.turn_speed = 400  # Degrees/second
         self.aim = (30, 30)  # Our desired point of target
-        self.size = 30
+        self.size = 60
 
         self.max_hp = 100
         self.hp = self.max_hp

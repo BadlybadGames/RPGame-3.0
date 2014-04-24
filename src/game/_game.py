@@ -25,7 +25,7 @@ import interface.gui
 LERP_TIME = 0.1
 LERP_MAX_VEL = 80
 
-PIXEL_TO_METER = 20.0  # Conversion rate of physics meter to screen pixels
+PIXEL_TO_METER = 30.0  # Conversion rate of physics meter to screen pixels
 
 # TODO: Get rid of these global variables. Possibly use director.scene or director functions instead?
 game = None
@@ -58,7 +58,7 @@ def start():
     scroller.add(scrolling_layer)
 
     lvl = level.BasicLevel()
-    game.set_level(lvl)
+    #game.set_level(lvl)
     audio.play_music()
 
     #load game data
@@ -79,16 +79,17 @@ def start():
 
     #initalize the general collision system
     grid = collision.get_map_grid()
+    print(grid)
     for x, i in enumerate(grid):
         for y, tile in enumerate(i):
             if tile:
                 # TODO: non-static tile width/height
-                scale = 32.0 / PIXEL_TO_METER
+                scale = 64.0 / PIXEL_TO_METER
                 body = game.collision_world.CreateStaticBody(
                     position=(x * scale, y * scale),
                     userData = {"type": "wall"}
                 )
-                body.CreatePolygonFixture(box=(scale, scale))
+                body.CreatePolygonFixture(box=(scale/2.0, scale/2.0))
 
     #add an enemy for testing purposes
     #enemy = entity.get_entity_type("basicenemy")()
@@ -183,7 +184,8 @@ class Game():
         self.tick += t
 
         #update the level
-        self.level.on_update(t)
+        if hasattr(self, "level"):
+            self.level.on_update(t)
 
         for i in self.get_entities():
             self.update_entity(i, t)
@@ -212,7 +214,7 @@ class Game():
             scroller.set_focus(*(player.position * PIXEL_TO_METER), force=True)
         for e in self.get_entities():
             if e.sprite:
-                e.sprite.position = e.position.copy() * PIXEL_TO_METER
+                e.sprite.position = (e.position.copy() * PIXEL_TO_METER) + (e.sprite.image.width//2, e.sprite.image.height//2)
                 e.sprite.rotation = e.rotation
                 if False:
                     #Interpolation
@@ -372,7 +374,10 @@ class Game():
 
         ent.body = self.collision_world.CreateDynamicBody(position=ent.position.copy(), linearDamping=4.0,
                                                           userData=_ud)
-        ent.body.CreateCircleFixture(radius=(ent.size / PIXEL_TO_METER) / 2, restitution=0)
+
+        print((float(ent.size)/ PIXEL_TO_METER) / 2)
+        print((float(64)/PIXEL_TO_METER))
+        ent.body.CreateCircleFixture(radius=(float(ent.size) / PIXEL_TO_METER) / 2, restitution=0)
 
         ent.on_init()
 
