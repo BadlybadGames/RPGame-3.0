@@ -12,7 +12,7 @@ def init():
     bar_left = pyglet.resource.texture("left.png")
     bar_right = pyglet.resource.texture("right.png")
     middle_unfilled = pyglet.resource.texture("middle_unfilled.png")
-    middle_filled = pyglet.resource.texture("middle_filled_2.png")
+    middle_filled = pyglet.resource.texture("middle_filled.png")
     _textures["default"]["left"] = bar_left
     _textures["default"]["right"] = bar_right
     _textures["default"]["unfilled"] = middle_unfilled
