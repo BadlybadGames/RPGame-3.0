@@ -22,6 +22,8 @@ import tilemap
 import interface
 import interface.gui
 
+import resources
+
 LERP_TIME = 0.1
 LERP_MAX_VEL = 80
 
@@ -32,15 +34,13 @@ game = None
 layer = None
 scroller = None
 
-T_WALL = 0b001
-T_PROJECTILE = 0b010
-T_ENTITY = 0b100
-
 
 def start():
     global scroller
     global game
     global collision_map
+
+    resources.init()
 
     #Setup the game
     #The scene structure is like this:
@@ -62,7 +62,7 @@ def start():
     scroller.add(scrolling_layer)
 
     lvl = level.BasicLevel()
-    #game.set_level(lvl)
+    game.set_level(lvl)
     audio.play_music()
 
     #load game data

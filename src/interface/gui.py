@@ -4,6 +4,8 @@ from pyglet import graphics
 from pyglet.gl import *
 import game
 
+import resources
+
 _textures = {"default":{}}
 
 def init():
@@ -21,7 +23,7 @@ def init():
 
 class Bar(cocos.cocosnode.CocosNode):
 
-    def __init__(self, x, y, w, h, color=(255,)*3*4, factor=1.0, style="default"):
+    def __init__(self, x, y, w, h, color=(255,)*3*4, factor=1.0, style="default", text_display = None):
         """
 
         @param x:
@@ -31,6 +33,7 @@ class Bar(cocos.cocosnode.CocosNode):
         @param color: (R,G,B) * 4, color parameters for each vertex
         @param factor: how filled the bar is, 0.0 is 0% filled, 1.0 is 100% filled
         @param style: border graphics style
+        @param text_display: if given, should be a function that returns a string for the bar to display on itself based on factor
         """
         super(Bar, self).__init__()
 
@@ -41,10 +44,16 @@ class Bar(cocos.cocosnode.CocosNode):
         self.factor = factor
         self.color = color
         self._texes = _textures[style]
+        self.text_f = text_display
+        if text_display:
+            pos = ((self.w//2), (self.h//2))
+            fnt = resources.font("gui_bars")
+            self.text = cocos.text.Label("", position=pos, anchor_x="center", anchor_y="center", font_size=11, font_name=fnt)
+            self.add(self.text, z=1)
 
-        self._update()
+        self._update(init=True)
 
-    def _update(self):
+    def _update(self, init=False):
         """
         Recalculates vertex list
 
@@ -53,6 +62,9 @@ class Bar(cocos.cocosnode.CocosNode):
         y = self.y
         w = self.w  #* self.factor
         h = self.h
+
+        if self.text_f and not init:
+            self.text.element.text = self.text_f(self.factor)
 
 
         OUTLINE_THICKNESS = 2
@@ -208,17 +220,20 @@ class Gui(cocos.layer.Layer):
     def __init__(self):
         super(Gui, self).__init__()
 
-        #Gradiented colours
-        g_red = (255, 0, 0, 255, 0, 0, 255, 130, 130, 255, 130, 130)
-        g_blue = (0, 0, 255, 0, 0, 255, 130, 130, 255, 130, 130, 255)
-        g_green = (0, 255, 0, 0, 255, 0, 130, 255, 130, 130, 255, 130)
-        #Regular
+        self.bars = []
+
         red = (255, 0, 0)*4
         blue = (0, 0, 255)*4
         green = (0, 255, 0)*4
-        self.hp_bar = Bar(50, 50, 200, 32, color=red)
+
+        hp_f = lambda f: "{hp}/{max_hp}".format(hp=int(math.ceil(game.Game.get_player().hp)), max_hp=game.Game.get_player().max_hp)
+        xp_f = lambda f: "{xp}/{xp_needed}".format(xp=game.Game.get_player().xp, xp_needed=game.Game.get_player().xp_needed)
+
+        self.hp_bar = Bar(50, 50, 200, 32, color=red, text_display=hp_f)
         self.mana_bar = Bar(50, 50+40*1, 200, 32, color=blue)
-        self.xp_bar = Bar(50, 50+40*2, 200, 32, color=green)
+        self.xp_bar = Bar(50, 50+40*2, 200, 32, color=green, text_display=xp_f)
+
+        self.bars.extend((self.hp_bar, self.mana_bar, self.xp_bar))
 
         self.log = MessageLog()
         self.log.position = (50, 160)
@@ -241,3 +256,7 @@ class Gui(cocos.layer.Layer):
 
         f = min(max(float(player.xp) / player.xp_needed, 0), 1.0)
         self.xp_bar.set_factor(f)
+
+        for bar in self.bars:
+            bar._update()
+
