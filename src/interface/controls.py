@@ -3,6 +3,7 @@ import pyglet
 from pyglet import input
 
 import game
+import constants
 
 control = None
 
@@ -100,8 +101,8 @@ class PlayerController(Controller):
             return
 
         px, py = player.position
-        px *= game.PIXEL_TO_METER
-        py *= game.PIXEL_TO_METER
+        px *= constants.PIXEL_TO_METER
+        py *= constants.PIXEL_TO_METER
         fx, fy = game.scroller.s_layer.point_to_local((x - px, y - py))  # TODO: game.scroller; nasty
 
         self.state["aim"][0] = fx

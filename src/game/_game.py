@@ -18,16 +18,15 @@ import events
 import level
 import audio
 import tilemap
+import constants
+import resources
 
 import interface
 import interface.gui
 
-import resources
 
 LERP_TIME = 0.1
 LERP_MAX_VEL = 80
-
-PIXEL_TO_METER = 30.0  # Conversion rate of physics meter to screen pixels
 
 # TODO: Get rid of these global variables. Possibly use director.scene or director functions instead?
 game = None
@@ -87,7 +86,7 @@ def start():
         for y, tile in enumerate(i):
             if tile:
                 # TODO: non-static tile width/height
-                scale = 64.0 / PIXEL_TO_METER
+                scale = 64.0 / constants.PIXEL_TO_METER
                 body = game.collision_world.CreateStaticBody(
                     position=(x * scale, y * scale),
                     userData = {"type": "wall",
@@ -125,7 +124,11 @@ def start():
 class _ContactListener(Box2D.b2ContactListener):
 
     def BeginContact(self, contact):
-        pass
+        a, b = contact.fixtureA, contact.fixtureB
+        if a.sensor ^ b.sensor:
+            sensor, other = a.sensor and (a, b) or (b, a)
+            entity = sensor.body.userData.get("entity")
+            entity.sensor_callbacks[sensor](entity, other.body.userData.get("entity"))
 
     def EndContact(self, contact):
         pass
@@ -219,20 +222,20 @@ class Game():
     def update_render(self, t):
         player = game.get_player()
         if player:  # Update scrolling layer
-            scroller.set_focus(*(player.position * PIXEL_TO_METER), force=True)
+            scroller.set_focus(*(player.position * constants.PIXEL_TO_METER), force=True)
         for e in self.get_entities():
             if e.sprite:
-                e.sprite.position = (e.position.copy() * PIXEL_TO_METER) + (e.sprite.image.width//2, e.sprite.image.height//2)
+                e.sprite.position = (e.position.copy() * constants.PIXEL_TO_METER) + (e.sprite.image.width//2, e.sprite.image.height//2)
                 e.sprite.rotation = e.rotation
                 if False:
                     #Interpolation
                     #Interpolate over LERP_TIME
                     # TODO: Do not interpolate local objects/objects owned by us
-                    v = e.position / PIXEL_TO_METER - e.sprite.position
+                    v = e.position / constants.PIXEL_TO_METER - e.sprite.position
                     if v.magnitude() > LERP_MAX_VEL:
-                        e.sprite.position = e.position * PIXEL_TO_METER
+                        e.sprite.position = e.position * constants.PIXEL_TO_METER
                     else:
-                        e.sprite.position += (v * t / LERP_TIME) * PIXEL_TO_METER
+                        e.sprite.position += (v * t / LERP_TIME) * constants.PIXEL_TO_METER
                     e.sprite.rotation = (e.sprite.rotation + e.rotation) / 2
 
     def run_physics(self, dt):
@@ -365,7 +368,7 @@ class Game():
         if ent.image:
             img = pyglet.resource.image(ent.image)
             ent.sprite = cocos.sprite.Sprite(img)
-            ent.sprite.position = ent.position.copy() * PIXEL_TO_METER
+            ent.sprite.position = ent.position.copy() * constants.PIXEL_TO_METER
             ent._init_sprite(ent.sprite)
             #if e.attached_to:
             #    anchor = self.get_entity(e.attached_to)
@@ -377,16 +380,8 @@ class Game():
         #if ent.etype == "projectile":
         #    ent.body = self.collision_world.CreateKinematicBody(position=ent.position.copy())
         #    #e.body.CreateCircleFixture(radius=(e.size/PIXEL_TO_METER)/2, restitution=0, density=0.2)
-        _ud = {"type": "entity",
-               "entity": ent,
-               "mask_collision": ent.mask_collision,
-               "mask_event": ent.mask_event,
-               "friendly": ent.friendly}  # TODO: keeping a reference to the actual entity might be harmful in multiplayer environment.
 
-        ent.body = self.collision_world.CreateDynamicBody(position=ent.position.copy(), linearDamping=4.0,
-                                                          userData=_ud)
-
-        ent.body.CreateCircleFixture(radius=(float(ent.size) / PIXEL_TO_METER) / 2, restitution=0)
+        ent.init_physics(self.collision_world)
 
         ent.on_init()
 

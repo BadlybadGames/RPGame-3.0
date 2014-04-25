@@ -47,7 +47,19 @@ class BasicEnemy(npc):
     image = "player.png"
 
     name = "basicenemy"
+    attack_range = 1.0  # The attack_range is the reach from the edge of the body's shape, to the intended range in box2d meters
 
     xp_worth = 20
+
+    def init_physics(self, world):
+        super(npc, self).init_physics(world)
+        sensor = self.body.CreateCircleFixture(radius=self.attack_range, isSensor=True)
+
+        def callback(us, other):
+            if other and other.is_player:
+                other.take_damage(10)
+
+        self.sensor_callbacks[sensor] = callback
+
 
 entity.new_entity(BasicEnemy)

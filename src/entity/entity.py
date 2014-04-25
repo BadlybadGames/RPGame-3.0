@@ -3,6 +3,7 @@ import logging
 import cocos
 from cocos import euclid
 from cocos.euclid import Vector2
+import constants
 import game
 
 F_ENTITY = 1
@@ -58,6 +59,7 @@ class Entity(object):
 
     def __init__(self):
         self.is_player = False
+        self.sensor_callbacks = {}  # Sensors in the physics system
 
         #which player_id it is controlled by. 0 means server
         self.controlled_by = 0
@@ -75,9 +77,9 @@ class Entity(object):
 
 
 
-
     def update(self, t):
         pass
+
 
     def update_from_json(self, json):
         """Update our state based on information received from the network
@@ -171,6 +173,18 @@ class WorldEntity(Entity):
 
     def on_init(self):
         pass
+
+    def init_physics(self, world):
+        _ud = {"type": "entity",
+               "entity": self,
+               "mask_collision": self.mask_collision,
+               "mask_event": self.mask_event,
+               "friendly": self.friendly}  # TODO: keeping a reference to the actual entity might be harmful in multiplayer environment.
+
+        self.body = world.CreateDynamicBody(position=self.position.copy(), linearDamping=4.0,
+                                                          userData=_ud)
+
+        self.body.CreateCircleFixture(radius=(float(self.size) / constants.PIXEL_TO_METER) / 2, restitution=0)
 
     def update(self, t):
         super(WorldEntity, self).update(t)

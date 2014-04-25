@@ -3,7 +3,6 @@ import cocos
 from cocos.director import director
 
 import _game
-from _game import PIXEL_TO_METER
 
 Game = None
 Layer = None  # This might not need to be public, Scene could possibly be used instead (or director)

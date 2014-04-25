@@ -1,3 +1,4 @@
+import constants
 import entity
 from cocos import collision_model as cm
 from cocos.euclid import Vector2
@@ -17,6 +18,19 @@ class Projectile(entity.WorldEntity):
 
     def __init__(self, **kwargs):
         super(Projectile, self).__init__()
+
+    def init_physics(self, world):
+        _ud = {"type": "projectile",
+               "entity": self,
+               "mask_collision": self.mask_collision,
+               "mask_event": self.mask_event,
+               "friendly": self.friendly}  # TODO: keeping a reference to the actual entity might be harmful in multiplayer environment.
+
+        self.body = world.CreateDynamicBody(position=self.position.copy(), linearDamping=4.0,
+                                            userData=_ud)
+
+        self.body.CreateCircleFixture(radius=(float(self.size) / constants.PIXEL_TO_METER) / 2, restitution=0)
+
 
 
     def update(self, t):
