@@ -10,13 +10,18 @@ class Projectile(entity.WorldEntity):
 
     etype = "projectile"
     name = "Projectile"
-    collides_with = entity.F_WALL + entity.F_ENTITY
+    friendly = False
+
+    mask_collision = 0b000
+    mask_event = 0b101
 
     def __init__(self, **kwargs):
         super(Projectile, self).__init__()
 
+
     def update(self, t):
         super(Projectile, self).update(t)
+
 
         self.duration -= t
         if self.duration <= 0:

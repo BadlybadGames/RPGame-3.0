@@ -12,6 +12,10 @@ class Player(entity.WorldEntity):
     name = "player"
     etype = "player"
 
+    friendly = True
+    mask_collision = 0b011
+    mask_event = 0b010
+
     def __init__(self):
         self._xp = 0
         self.entity_name = "player"

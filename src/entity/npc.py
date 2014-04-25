@@ -13,6 +13,9 @@ class npc(entity.WorldEntity):
     etype = "enemy"
     name = "npc"
 
+    mask_collision = 0b011
+    mask_event = 0b010
+
     def __init__(self):
         super(npc, self).__init__()
 

@@ -39,6 +39,7 @@ class BowWeapon(Weapon):
         e = entity.get_entity_type("Projectile")()
 
         e.damage = 20
+        e.friendly = real_wielder.friendly
         e.controlled_by = real_wielder.controlled_by
         e.position = real_wielder.position.copy()
         e.duration = self.proj_life
@@ -72,6 +73,7 @@ class MeleeWeapon(Weapon):
         real_wielder = self.get_wielder()  # The real entity (not the eid)
         e = entity.get_entity_type("MeleeWeaponEntity")()
         e.damage = self.damage
+        e.friendly = real_wielder.friendly
         e.attached_to = self.wielder
         e.wielder = self.wielder
         e.controlled_by = real_wielder.controlled_by

@@ -32,6 +32,10 @@ game = None
 layer = None
 scroller = None
 
+T_WALL = 0b001
+T_PROJECTILE = 0b010
+T_ENTITY = 0b100
+
 
 def start():
     global scroller
@@ -79,7 +83,6 @@ def start():
 
     #initalize the general collision system
     grid = collision.get_map_grid()
-    print(grid)
     for x, i in enumerate(grid):
         for y, tile in enumerate(i):
             if tile:
@@ -87,7 +90,10 @@ def start():
                 scale = 64.0 / PIXEL_TO_METER
                 body = game.collision_world.CreateStaticBody(
                     position=(x * scale, y * scale),
-                    userData = {"type": "wall"}
+                    userData = {"type": "wall",
+                                "friendly": False,
+                                "mask_collision": 0b110,
+                                "mask_event": 0b000}
                 )
                 body.CreatePolygonFixture(box=(scale/2.0, scale/2.0))
 
@@ -134,24 +140,26 @@ class _ContactListener(Box2D.b2ContactListener):
         Projectile vs Wall: event (should collide if die?)
         Projectile vs Projectile: Nothing? (or event?)
         """
-        #TODO: this needs optimization
+        #Userdata is the only thing used to resolve collisions
+        #type: entity type
+        #friendly: friendly to player? if it is, do not generate collision but generate event
+        #mask_collision: collision mask
+        #mask_event: event mask
+
         a = contact.fixtureA.body.userData
         b = contact.fixtureB.body.userData
 
-        if a["type"] == "wall" or b["type"] == "wall":
-            wall, other = a["type"] == "wall" and (a, b) or (b, a)
-            if other["entity"].collides_with & entity.F_WALL:
-                other["entity"].on_collision(other=None, typ="wall")
-                return
-            else:
-                return
 
-        #Collision currently assumed to be reflective
-        if a["entity"].collides_with & b["entity"].collision_type:
-            a["entity"].on_collision(b["entity"], typ=b["entity"].collision_type)
-            b["entity"].on_collision(a["entity"], typ=a["entity"].collision_type)
-            return
+        collision = (a["mask_collision"] & b["mask_collision"]) and not (a["friendly"] and b["friendly"])
+        event_a = a["mask_event"] & b["mask_collision"]
+        event_b = b["mask_event"] & a["mask_collision"]
 
+        if event_a:
+            a["entity"].on_collision(other=b.get("entity"), typ=b["type"])
+        if event_b:
+            b["entity"].on_collision(other=a.get("entity"), typ=a["type"])
+
+        contact.enabled=bool(collision)
 
     def PostSolve(self, contact, impulse):
         pass
@@ -370,13 +378,14 @@ class Game():
         #    ent.body = self.collision_world.CreateKinematicBody(position=ent.position.copy())
         #    #e.body.CreateCircleFixture(radius=(e.size/PIXEL_TO_METER)/2, restitution=0, density=0.2)
         _ud = {"type": "entity",
-               "entity": ent}  # TODO: keeping a reference to the actual entity might be harmful in multiplayer environment.
+               "entity": ent,
+               "mask_collision": ent.mask_collision,
+               "mask_event": ent.mask_event,
+               "friendly": ent.friendly}  # TODO: keeping a reference to the actual entity might be harmful in multiplayer environment.
 
         ent.body = self.collision_world.CreateDynamicBody(position=ent.position.copy(), linearDamping=4.0,
                                                           userData=_ud)
 
-        print((float(ent.size)/ PIXEL_TO_METER) / 2)
-        print((float(64)/PIXEL_TO_METER))
         ent.body.CreateCircleFixture(radius=(float(ent.size) / PIXEL_TO_METER) / 2, restitution=0)
 
         ent.on_init()

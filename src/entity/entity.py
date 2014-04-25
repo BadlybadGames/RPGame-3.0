@@ -132,10 +132,13 @@ class Entity(object):
 
 class WorldEntity(Entity):
     """A physical entity that usually has a physical appearance"""
-    collision_type = F_ENTITY
-    collides_with = F_ENTITY + F_PROJECTILE + F_WALL
+
+    mask_collision = 0b000
+    mask_event = 0b000
 
     xp_worth = 0
+
+    friendly = False
 
     def __init__(self, position=(0,0)):
         super(WorldEntity, self).__init__()
@@ -157,6 +160,7 @@ class WorldEntity(Entity):
 
         self.max_hp = 100
         self.hp = self.max_hp
+
 
         self.level = 1
 
