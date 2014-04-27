@@ -155,6 +155,7 @@ class WorldEntity(Entity):
         self.mov_acc = euclid.Vector2(0.0, 0.0)
         self.move_dir = euclid.Vector2(0.0, 0.0)
         self.movement_speed = 1.0
+        self.movement_speed_mod = 1.0
         self.acc_speed = 200
         self.turn_speed = 400  # Degrees/second
         self.aim = (30, 30)  # Our desired point of target
@@ -176,7 +177,7 @@ class WorldEntity(Entity):
 
     def init_physics(self, world):
         _ud = {"type": "entity",
-               "entity": self,
+               "entity": self.eid,
                "mask_collision": self.mask_collision,
                "mask_event": self.mask_event,
                "friendly": self.friendly}  # TODO: keeping a reference to the actual entity might be harmful in multiplayer environment.
@@ -206,7 +207,7 @@ class WorldEntity(Entity):
             self.old_pos = self.position.copy()
             self.mov_acc = self.move_dir * self.acc_speed
 
-            f = self.move_dir * t * self.movement_speed * 930
+            f = self.move_dir * t * self.movement_speed * self.movement_speed_mod * 930
             self.body.ApplyForceToCenter(force=f, wake=True)
             self.mov_vel += self.mov_acc * t
 
@@ -216,6 +217,13 @@ class WorldEntity(Entity):
     def die(self):
         self.on_die()
         self.dead = True
+
+    def register_sensor(self, sensor, callback):
+        """Register a sensor for this entity's body. This callback will be continously called as long as something is
+        detected in the sensor, with all the detected fixtures
+
+        @param sensor: Box2D.b2Fixture with isSensor=true
+        @param callback: """
 
     def on_die(self):
         """ Called when we die, should be safe to overload. usually

@@ -21,7 +21,7 @@ class Projectile(entity.WorldEntity):
 
     def init_physics(self, world):
         _ud = {"type": "projectile",
-               "entity": self,
+               "entity": self.eid,
                "mask_collision": self.mask_collision,
                "mask_event": self.mask_event,
                "friendly": self.friendly}  # TODO: keeping a reference to the actual entity might be harmful in multiplayer environment.

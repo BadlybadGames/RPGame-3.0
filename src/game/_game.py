@@ -128,10 +128,33 @@ class _ContactListener(Box2D.b2ContactListener):
         if a.sensor ^ b.sensor:
             sensor, other = a.sensor and (a, b) or (b, a)
             entity = sensor.body.userData.get("entity")
-            entity.sensor_callbacks[sensor](entity, other.body.userData.get("entity"))
+            if not sensor in game.sensor_detections.keys():
+                game.sensor_detections[sensor] = [entity, []]
+            typ, other_entity = other.body.userData["type"], other.body.userData.get("entity")
+            if other_entity:
+                other_entity = other_entity
+            game.sensor_detections[sensor][1].append((typ, other_entity))
 
     def EndContact(self, contact):
-        pass
+        a, b = contact.fixtureA, contact.fixtureB
+        if a.sensor ^ b.sensor:
+            sensor, other = a.sensor and (a, b) or (b, a)
+            entity = sensor.body.userData.get("entity")
+            #if entity and entity.dead:  # If they are dead, we ignore them
+            #    del(game.sensor_callbacks[sensor])
+
+            if sensor in game.sensor_detections.keys():
+                typ = other.body.userData.get("type")
+                if not typ:
+                    pass
+                    #print(other.body.userData)
+                other_entity = other.body.userData.get("entity")
+                if other_entity:
+                    other_entity = other_entity
+                if (typ, other_entity) in game.sensor_detections[sensor][1]:  # FIXME: Destroyed bodies act weird so they arent removed from the callback list. !important!
+                    game.sensor_detections[sensor][1].remove((typ, other_entity))
+                if len(game.sensor_detections[sensor]) == 0:
+                    del(game.sensor_detections[sensor])
 
     def PreSolve(self, contact, oldManifold):
         """Handles collision events
@@ -158,9 +181,13 @@ class _ContactListener(Box2D.b2ContactListener):
         event_b = b["mask_event"] & a["mask_collision"]
 
         if event_a:
-            a["entity"].on_collision(other=b.get("entity"), typ=b["type"])
+            ent_a = game.get_entity(a.get("entity"))
+            ent_b = game.get_entity(b.get("entity"))
+            ent_a.on_collision(other=ent_b, typ=b["type"])
         if event_b:
-            b["entity"].on_collision(other=a.get("entity"), typ=a["type"])
+            ent_a = game.get_entity(a.get("entity"))
+            ent_b = game.get_entity(b.get("entity"))
+            ent_b.on_collision(other=ent_a, typ=a["type"])
 
         contact.enabled=bool(collision)
 
@@ -190,6 +217,9 @@ class Game():
         self.collision_world = Box2D.b2World(gravity=(0, 0),
                                              contactListener=_ContactListener())
 
+        self.sensor_detections = {}
+        self.sensor_callbacks = {}
+
     def update(self, t):
         #Update position then velocity
         self.tick += t
@@ -210,14 +240,14 @@ class Game():
             v *= e.movement_speed * 5.0  # Meters per tick at 100% movementspeed
             #e.body.linearVelocity = v.copy()
 
-            # The collision detection requires objects with .cshape attributes, so we do this.
-            obj = namedtuple('Shape', ("cshape", "entity"))
-            obj.cshape = e.update_collision()
-            obj.entity = e
-            self.collision.add(obj)
-
         #self.run_collision()
         self.run_physics(t)
+
+        #Update sensor calbacks
+        for sensor, data in self.sensor_detections.items():
+            sensing_actor = data[0]
+            detections = data[1]
+            self.sensor_callbacks[sensor](sensing_actor, detections, t)
 
     def update_render(self, t):
         player = game.get_player()
@@ -279,6 +309,9 @@ class Game():
         ent.update(t)
         if ent.dead:
             self.despawn(ent)
+
+    def register_sensor(self, sensor, callback):
+        self.sensor_callbacks[sensor] = callback
 
     def set_level(self, lvl):
         self.level = lvl
@@ -400,6 +433,8 @@ class Game():
         if ent.eid in self.entities.keys():
             self.entities[ent.eid] = None  # DEAD!
         if hasattr(ent, "body"):
+            #for fix in ent.body.fixtures:
+                #ent.body.DestroyFixture(sensor)
             self.collision_world.DestroyBody(ent.body)
 
 

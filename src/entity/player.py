@@ -1,6 +1,7 @@
 from cocos import euclid
 from cocos import collision_model as cm
 from cocos.euclid import Vector2
+import constants
 
 import util
 
@@ -27,6 +28,18 @@ class Player(entity.WorldEntity):
         self.local = True  # TODO: This might be a little dirty
         self.player = 0  # Who controls this player? 0 = local, n = external
         self.weapon = None
+
+    def init_physics(self, world):
+        _ud = {"type": "entity",
+               "entity": self.eid,
+               "mask_collision": self.mask_collision,
+               "mask_event": self.mask_event,
+               "friendly": self.friendly}  # TODO: keeping a reference to the actual entity might be harmful in multiplayer environment.
+
+        self.body = world.CreateDynamicBody(position=self.position.copy(), linearDamping=4.0,
+                                            userData=_ud)
+
+        self.body.CreateCircleFixture(radius=(float(self.size) / constants.PIXEL_TO_METER) / 2, restitution=0)
 
     def update(self, t):
         super(Player, self).update(t)
