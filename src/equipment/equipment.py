@@ -1,4 +1,5 @@
 from cocos import euclid
+import constants
 import util
 import entity
 import events
@@ -67,6 +68,8 @@ class MeleeWeapon(Weapon):
         self.attack_speed = 1.1
         self.offset = 30
         self.size = 20
+        self.p_width = 20 / constants.PIXEL_TO_METER
+        self.p_length = 20 / constants.PIXEL_TO_METER
         self.damage = 20
 
     def attack(self):
@@ -84,6 +87,8 @@ class MeleeWeapon(Weapon):
         e.arc = self.arc
         e.size = self.size
         e.rotation_off = -self.arc / 2
+        e.width = self.p_width
+        e.length = self.p_length
         game.Game.spawn(e)
 
         if game.Game.is_controlled(e):

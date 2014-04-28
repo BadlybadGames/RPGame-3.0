@@ -214,6 +214,10 @@ class WorldEntity(Entity):
             #perform friction. Improve pls!
             self.mov_vel = self.mov_vel * ((1 - t) * 0.5)
 
+    def update_sprite(self, t):
+        self.sprite.position = (self.position.copy() * constants.PIXEL_TO_METER) + (self.sprite.image.width/2.0, self.sprite.image.height/2.0)
+        self.sprite.rotation = self.rotation
+
     def die(self):
         self.on_die()
         self.dead = True

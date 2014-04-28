@@ -61,7 +61,7 @@ def start():
     scroller.add(scrolling_layer)
 
     lvl = level.BasicLevel()
-    game.set_level(lvl)
+    #game.set_level(lvl)
     audio.play_music()
 
     #load game data
@@ -147,7 +147,6 @@ class _ContactListener(Box2D.b2ContactListener):
                 typ = other.body.userData.get("type")
                 if not typ:
                     pass
-                    #print(other.body.userData)
                 other_entity = other.body.userData.get("entity")
                 if other_entity:
                     other_entity = other_entity
@@ -255,8 +254,7 @@ class Game():
             scroller.set_focus(*(player.position * constants.PIXEL_TO_METER), force=True)
         for e in self.get_entities():
             if e.sprite:
-                e.sprite.position = (e.position.copy() * constants.PIXEL_TO_METER) + (e.sprite.image.width//2, e.sprite.image.height//2)
-                e.sprite.rotation = e.rotation
+                e.update_sprite(t)
                 if False:
                     #Interpolation
                     #Interpolate over LERP_TIME
@@ -432,10 +430,11 @@ class Game():
             self.local_entities[ent.eid] = None  # It is now dead
         if ent.eid in self.entities.keys():
             self.entities[ent.eid] = None  # DEAD!
-        if hasattr(ent, "body"):
+        if hasattr(ent, "body") and ent.body:
             #for fix in ent.body.fixtures:
                 #ent.body.DestroyFixture(sensor)
             self.collision_world.DestroyBody(ent.body)
+            ent.body = None
 
 
     def get_entity_type(self, name):

@@ -37,7 +37,7 @@ class MainMenu(cocos.menu.Menu):
         game.Game.set_player(player.eid)
         player.controlled_by = player.eid
 
-        bow = entity.get_entity_type("BasicBow")(player)
+        bow = entity.get_entity_type("BasicMeleeWeapon")(player)
         player.weapon = bow
 
     def on_host(self):
