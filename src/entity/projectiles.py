@@ -1,4 +1,3 @@
-from Box2D import Box2D
 import math
 import constants
 import entity
@@ -84,9 +83,11 @@ class MeleeWeaponEntity(Projectile):
     etype = "Projectile"
 
     def __init__(self, **kwargs):
-        self.controlled_by = None  # set after initialization
         self.image = "sword.png"
         super(MeleeWeaponEntity, self).__init__()
+        self.controlled_by = None  # set after initialization
+
+        self._already_hit = []
 
     def init_physics(self, world):
         owner = self.get_real_owner()
@@ -102,14 +103,13 @@ class MeleeWeaponEntity(Projectile):
 
         t = owner.rotation
 
+        fixture = self.body.CreatePolygonFixture(box=(0.33*4, 0.33*2), density=1, friction=0.1)
 
-        fixture = self.body.CreatePolygonFixture(box=(self.width / 2, self.length / 2), density=1, friction=0.1)
-
-        self.body.angle=t
+        self.body.angle = t
 
 
-        self.joint = world.CreateRevoluteJoint(bodyA=self.body, bodyB=owner.body, anchor=owner.body.worldCenter, enableMotor=True,
-                                               motorSpeed=50.0, maxMotorTorque=10.0)
+        world.CreateRevoluteJoint(bodyA=self.body, bodyB=owner.body, anchor=owner.body.worldCenter, enableMotor=True,
+                                               motorSpeed=self.swing_speed*2, maxMotorTorque=self.swing_speed*2)
 
     def _init_sprite(self, sprite):  # TODO: Sprite still isnt centered on player
         sprite.image_anchor = (sprite.image.width/2, 0) #(sprite.image.width/2, sprite.image.height/2)
@@ -118,7 +118,7 @@ class MeleeWeaponEntity(Projectile):
         wielder = game.Game.get_entity(self.wielder)
         s = (wielder.size/2.0)
         self.sprite.position = ((self.position.copy() * constants.PIXEL_TO_METER + (s, s)))
-        self.sprite.rotation = self.rotation
+        self.sprite.rotation = self.body.angle
 
     def update(self, t):
         super(MeleeWeaponEntity, self).update(t)
@@ -139,6 +139,23 @@ class MeleeWeaponEntity(Projectile):
         center = Vector2(*self.position) + util.rot_to_vec(self.rotation) * self.offset
         #print center, self.size
         return cm.CircleShape(center=center, r=self.size)
+
+    def on_collision(self, other, typ):
+
+        if typ == "wall":
+            return
+
+        success = False
+        owner = game.Game.get_entity(self.controlled_by)
+        if not owner:
+            return
+
+        if other is owner:
+            return
+
+        if not other.eid in self._already_hit:
+            self._already_hit.append(other.eid)
+            self.on_hit(other)
 
     def on_hit(self, other):
         other.take_damage(self.damage)

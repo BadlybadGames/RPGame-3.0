@@ -61,7 +61,7 @@ def start():
     scroller.add(scrolling_layer)
 
     lvl = level.BasicLevel()
-    #game.set_level(lvl)
+    game.set_level(lvl)
     audio.play_music()
 
     #load game data
@@ -111,7 +111,7 @@ def start():
     layer.add(c)
 
     scrolling_layer.schedule(game.update)
-    scrolling_layer.schedule(game.update_render)
+    #scrolling_layer.schedule(game.update_render)
 
     #Load the gui
     game.gui = interface.gui.Gui()  # TODO: would be better to have this is instance in the interface package
@@ -129,31 +129,29 @@ class _ContactListener(Box2D.b2ContactListener):
             sensor, other = a.sensor and (a, b) or (b, a)
             entity = sensor.body.userData.get("entity")
             if not sensor in game.sensor_detections.keys():
-                game.sensor_detections[sensor] = [entity, []]
+                game.sensor_detections[sensor.userData["sid"]] = [entity, []]
             typ, other_entity = other.body.userData["type"], other.body.userData.get("entity")
-            if other_entity:
-                other_entity = other_entity
-            game.sensor_detections[sensor][1].append((typ, other_entity))
+            game.sensor_detections[sensor.userData["sid"]][1].append((typ, other_entity))
 
     def EndContact(self, contact):
         a, b = contact.fixtureA, contact.fixtureB
         if a.sensor ^ b.sensor:
             sensor, other = a.sensor and (a, b) or (b, a)
-            entity = sensor.body.userData.get("entity")
+
+            entity = sensor.body.userData.copy().get("entity")
             #if entity and entity.dead:  # If they are dead, we ignore them
             #    del(game.sensor_callbacks[sensor])
 
-            if sensor in game.sensor_detections.keys():
+            if sensor.userData["sid"] in game.sensor_detections.keys():
                 typ = other.body.userData.get("type")
-                if not typ:
-                    pass
+                if not typ or typ == "projectile":
+                    return
                 other_entity = other.body.userData.get("entity")
-                if other_entity:
-                    other_entity = other_entity
-                if (typ, other_entity) in game.sensor_detections[sensor][1]:  # FIXME: Destroyed bodies act weird so they arent removed from the callback list. !important!
-                    game.sensor_detections[sensor][1].remove((typ, other_entity))
-                if len(game.sensor_detections[sensor]) == 0:
-                    del(game.sensor_detections[sensor])
+                if game.sensor_detections[sensor.userData["sid"]] and game.sensor_detections[sensor.userData["sid"]][1]:
+                    if (typ, other_entity) in game.sensor_detections[sensor.userData["sid"]][1]:  # FIXME: Destroyed bodies act weird so they arent removed from the callback list. !important!
+                        game.sensor_detections[sensor.userData["sid"]][1].remove((typ, other_entity))
+                    if len(game.sensor_detections[sensor.userData["sid"]][1]) == 0:
+                        del(game.sensor_detections[sensor.userData["sid"]])
 
     def PreSolve(self, contact, oldManifold):
         """Handles collision events
@@ -208,6 +206,7 @@ class Game():
         self.controlled_player = None
         self.tick = 0
         self.entity_count = 0
+        self._sensor_count = 0
 
         w, h = director.get_window_size()
         cell_size = 64 * 1.25  # The size used for grids for the collision manager
@@ -230,15 +229,6 @@ class Game():
         for i in self.get_entities():
             self.update_entity(i, t)
 
-        #Assuming all entities have collision
-        for e in self.get_entities():
-            # Update physics body movement
-            v = e.move_dir.copy()
-            if v.magnitude() > 1.0:
-                v.normalize()
-            v *= e.movement_speed * 5.0  # Meters per tick at 100% movementspeed
-            #e.body.linearVelocity = v.copy()
-
         #self.run_collision()
         self.run_physics(t)
 
@@ -247,6 +237,9 @@ class Game():
             sensing_actor = data[0]
             detections = data[1]
             self.sensor_callbacks[sensor](sensing_actor, detections, t)
+
+
+        self.update_render(t)
 
     def update_render(self, t):
         player = game.get_player()
@@ -309,7 +302,10 @@ class Game():
             self.despawn(ent)
 
     def register_sensor(self, sensor, callback):
-        self.sensor_callbacks[sensor] = callback
+        self._sensor_count += 1
+        sensor.userData = {"sid": self._sensor_count}
+
+        self.sensor_callbacks[sensor.userData["sid"]] = callback
 
     def set_level(self, lvl):
         self.level = lvl
@@ -431,10 +427,12 @@ class Game():
         if ent.eid in self.entities.keys():
             self.entities[ent.eid] = None  # DEAD!
         if hasattr(ent, "body") and ent.body:
-            #for fix in ent.body.fixtures:
-                #ent.body.DestroyFixture(sensor)
+            for fix in ent.body.fixtures:
+                if fix.sensor and fix.userData["sid"] in self.sensor_callbacks.keys():
+                    pass
+                    #del(self.sensor_callbacks[fix.userData["sid"]])
             self.collision_world.DestroyBody(ent.body)
-            ent.body = None
+            del(ent.body)
 
 
     def get_entity_type(self, name):

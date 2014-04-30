@@ -59,6 +59,8 @@ class MeleeWeapon(Weapon):
     name = "BasicMeleeWeapon"
     attack_sounds = ("swish-1.mp3", )
 
+    p_swing_speed = 50
+
     def __init__(self, wielder=None):
         super(MeleeWeapon, self).__init__(wielder)
 
@@ -70,7 +72,7 @@ class MeleeWeapon(Weapon):
         self.size = 20
         self.p_width = 20 / constants.PIXEL_TO_METER
         self.p_length = 20 / constants.PIXEL_TO_METER
-        self.damage = 20
+        self.damage = 200
 
     def attack(self):
         real_wielder = self.get_wielder()  # The real entity (not the eid)
@@ -87,6 +89,7 @@ class MeleeWeapon(Weapon):
         e.arc = self.arc
         e.size = self.size
         e.rotation_off = -self.arc / 2
+        e.swing_speed = self.p_swing_speed
         e.width = self.p_width
         e.length = self.p_length
         game.Game.spawn(e)

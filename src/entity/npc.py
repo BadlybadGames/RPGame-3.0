@@ -77,10 +77,14 @@ class BasicEnemy(npc):
                 return
             else:
                 for typ, other in detected:
+                    if not typ == "entity":
+                        continue
+
                     other = game.Game.get_entity(other)
-                    if other:
+                    if other and other.is_player:
                         self.attack(other)
         game.Game.register_sensor(sensor, callback)
+        #del(sensor)
 
 
 entity.new_entity(BasicEnemy)
