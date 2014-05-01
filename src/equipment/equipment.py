@@ -59,19 +59,19 @@ class MeleeWeapon(Weapon):
     name = "BasicMeleeWeapon"
     attack_sounds = ("swish-1.mp3", )
 
-    p_swing_speed = 50
+    p_swing_speed = 10000
 
     def __init__(self, wielder=None):
         super(MeleeWeapon, self).__init__(wielder)
 
         self.width = 5
         self.arc = 120
-        self.duration = 1.0
-        self.attack_speed = 1.1
+        self.attack_speed = 1.5
         self.offset = 30
         self.size = 20
-        self.p_width = 20 / constants.PIXEL_TO_METER
-        self.p_length = 20 / constants.PIXEL_TO_METER
+        self.p_duration = 1.2
+        self.p_width = 64 / constants.PIXEL_TO_METER
+        self.p_length = 128 / constants.PIXEL_TO_METER
         self.damage = 200
 
     def attack(self):
@@ -83,7 +83,7 @@ class MeleeWeapon(Weapon):
         e.wielder = self.wielder
         e.controlled_by = real_wielder.controlled_by
         e.position = real_wielder.position.copy()
-        e.duration = self.duration
+        e.duration = self.p_duration
         e.duration_left = e.duration
         e.offset = self.offset
         e.arc = self.arc

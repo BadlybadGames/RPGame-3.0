@@ -4,6 +4,7 @@ from cocos.director import director
 from cocos import collision_model as cm
 from cocos.euclid import Vector2
 from cocos.rect import Rect
+import time
 import pyglet
 import Box2D
 
@@ -57,8 +58,6 @@ def start():
     scroller.s_layer = scrolling_layer  # TODO: Ugh it reeks of nastiness
     layer = cocos.layer.Layer()
     game = Game()
-
-    scroller.add(scrolling_layer)
 
     lvl = level.BasicLevel()
     game.set_level(lvl)
@@ -219,6 +218,8 @@ class Game():
         self.sensor_callbacks = {}
 
     def update(self, t):
+        #print time.time()
+        #print(t)
         #Update position then velocity
         self.tick += t
 

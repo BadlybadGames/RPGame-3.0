@@ -60,6 +60,7 @@ class npc(entity.WorldEntity):
         other.take_damage(self.attack_damage)
         self.attack_cooldown = self.attack_speed
 
+
 class BasicEnemy(npc):
     image = "player.png"
     name = "basicenemy"
@@ -69,6 +70,7 @@ class BasicEnemy(npc):
 
     def init_physics(self, world):
         super(npc, self).init_physics(world)
+
         r = self.size / constants.PIXEL_TO_METER + self.attack_range
         sensor = self.body.CreateCircleFixture(radius=r, isSensor=True)
 

@@ -182,7 +182,7 @@ class WorldEntity(Entity):
                "mask_event": self.mask_event,
                "friendly": self.friendly}  # TODO: keeping a reference to the actual entity might be harmful in multiplayer environment.
 
-        self.body = world.CreateDynamicBody(position=self.position.copy(), linearDamping=4.0,
+        self.body = world.CreateDynamicBody(position=self.position.copy(), linearDamping=7.0,
                                                           userData=_ud)
 
         self.body.CreateCircleFixture(radius=(float(self.size) / constants.PIXEL_TO_METER) / 2, restitution=0)
@@ -207,7 +207,7 @@ class WorldEntity(Entity):
             self.old_pos = self.position.copy()
             self.mov_acc = self.move_dir * self.acc_speed
 
-            f = self.move_dir * t * self.movement_speed * self.movement_speed_mod * 930
+            f = self.move_dir * t * self.movement_speed * self.movement_speed_mod * constants.FORCE_CONSTANT
             self.body.ApplyForceToCenter(force=f, wake=True)
             self.mov_vel += self.mov_acc * t
 

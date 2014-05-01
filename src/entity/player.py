@@ -36,7 +36,7 @@ class Player(entity.WorldEntity):
                "mask_event": self.mask_event,
                "friendly": self.friendly}  # TODO: keeping a reference to the actual entity might be harmful in multiplayer environment.
 
-        self.body = world.CreateDynamicBody(position=self.position.copy(), linearDamping=4.0,
+        self.body = world.CreateDynamicBody(position=self.position.copy(), linearDamping=7.0,
                                             userData=_ud)
 
         self.body.CreateCircleFixture(radius=(float(self.size) / constants.PIXEL_TO_METER) / 2, restitution=0)

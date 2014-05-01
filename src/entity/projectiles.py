@@ -103,13 +103,13 @@ class MeleeWeaponEntity(Projectile):
 
         t = owner.rotation
 
-        fixture = self.body.CreatePolygonFixture(box=(0.33*4, 0.33*2), density=1, friction=0.1)
+        fixture = self.body.CreatePolygonFixture(box=(self.width, self.length), density=0.005, friction=0.0)
 
         self.body.angle = t
 
 
         world.CreateRevoluteJoint(bodyA=self.body, bodyB=owner.body, anchor=owner.body.worldCenter, enableMotor=True,
-                                               motorSpeed=self.swing_speed*2, maxMotorTorque=self.swing_speed*2)
+                                               motorSpeed=self.swing_speed*5000, maxMotorTorque=self.swing_speed*1000)
 
     def _init_sprite(self, sprite):  # TODO: Sprite still isnt centered on player
         sprite.image_anchor = (sprite.image.width/2, 0) #(sprite.image.width/2, sprite.image.height/2)
